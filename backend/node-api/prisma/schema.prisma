@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  profile      UserProfile?
+  goals        Goal[]
+  transactions Transaction[]
+  sessions     UserSession[]
+  gamification Gamification?
+  riskEvents   RiskEvent[]
+}
+
+model UserProfile {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  balance        Float    @default(0)
+  salary         Float    @default(0)
+  otherIncome    Float    @default(0)
+  investments    Float    @default(0)
+  rent           Float    @default(0)
+  food           Float    @default(0)
+  transport      Float    @default(0)
+  subscriptions  Float    @default(0)
+  entertainment  Float    @default(0)
+  miscExpenses   Float    @default(0)
+  kycVerified    Boolean  @default(false)
+  twoFaEnabled   Boolean  @default(false)
+  biometricEnabled Boolean @default(false)
+  alertsEnabled  Boolean  @default(false)
+  locationLock   Boolean  @default(false)
+  sessionTimeout Boolean  @default(false)
+  largeTransactionConfirm Boolean @default(false)
+  newDeviceAlert Boolean  @default(false)
+  cardFreeze     Boolean  @default(false)
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Goal {
+  id           String   @id @default(uuid())
+  userId       String
+  name         String
+  targetAmount Float
+  savedAmount  Float    @default(0)
+  targetDate   DateTime
+  isCompleted  Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  category  String
+  amount    Float
+  label     String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model UserSession {
+  id              String    @id @default(uuid())
+  userId          String
+  deviceId        String
+  isTrustedDevice Boolean   @default(false)
+  ipAddress       String?
+  loginAt         DateTime  @default(now())
+  lastActionAt   DateTime?
+  isActive        Boolean   @default(true)
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Gamification {
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  xp            Int       @default(0)
+  level         Int       @default(1)
+  streakDays    Int       @default(0)
+  lastLoginDate DateTime?
+  achievements  Json      @default("[]")
+  simCount      Int       @default(0)
+  updatedAt     DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model RiskEvent {
+  id               String   @id @default(uuid())
+  userId           String
+  actionType       String
+  amount           Float
+  riskScore        Int
+  riskLevel        String
+  decision         String
+  triggeredSignals Json
+  createdAt        DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
