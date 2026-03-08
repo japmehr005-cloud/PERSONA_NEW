@@ -23,6 +23,14 @@ app.use(cors({
 app.use(express.json())
 app.use(cookieParser())
 
+app.get('/', (req, res) => {
+  res.json({ status: 'PERSONA Node API running', version: '1.0' })
+})
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' })
+})
+
 app.use('/api/auth', authRoutes)
 app.use('/api/profile', profileRoutes)
 app.use('/api/goals', goalsRoutes)
