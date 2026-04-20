@@ -10,6 +10,15 @@ SIGNAL_WEIGHTS = {
     "high_retry_count": 15,
     "very_high_amount_abs": 20,
     "weak_security_posture": 20,
+    "time_of_day_anomaly": 15,
+    "velocity_check_high": 20,
+    "velocity_check_very_high": 35,
+    "beneficiary_trust_high": 20,
+    "beneficiary_trust_very_high": 35,
+    "conversational_risk_low": 10,
+    "conversational_risk_medium": 25,
+    "conversational_risk_high": 40,
+    "round_number_check": 10,
 }
 
 SIGNAL_DESCRIPTIONS = {
@@ -22,6 +31,11 @@ SIGNAL_DESCRIPTIONS = {
     "high_retry_count": "This action was retried multiple times",
     "very_high_amount_abs": "Amount exceeds ₹1,00,000",
     "weak_security_posture": "Security hardening score is below 50",
+    "time_of_day_anomaly": "This action is happening outside your normal active hours",
+    "velocity_check": "Unusually high number of actions in a short period",
+    "beneficiary_trust": "You have never sent money to this recipient before",
+    "conversational_risk": "How you are communicating right now differs from your normal pattern",
+    "round_number_check": "Large round number transfers to new recipients are a common fraud pattern",
 }
 
 
@@ -66,7 +80,46 @@ def calculate_risk(req: RiskRequest) -> RiskResponse:
         score += SIGNAL_WEIGHTS["weak_security_posture"]
         triggered.append("weak_security_posture")
 
-    if score >= 60:
+    hour = req.hour_of_day if req.hour_of_day is not None else 0
+    typical_hours = set(req.user_typical_hours or [])
+    if hour not in typical_hours and req.amount > 10000:
+        score += SIGNAL_WEIGHTS["time_of_day_anomaly"]
+        triggered.append("time_of_day_anomaly")
+
+    if (req.actions_last_hour or 0) > 10:
+        score += SIGNAL_WEIGHTS["velocity_check_very_high"]
+        triggered.append("velocity_check")
+    elif (req.actions_last_hour or 0) > 5:
+        score += SIGNAL_WEIGHTS["velocity_check_high"]
+        triggered.append("velocity_check")
+
+    if req.is_new_beneficiary and req.amount > 25000:
+        score += SIGNAL_WEIGHTS["beneficiary_trust_very_high"]
+        triggered.append("beneficiary_trust")
+    elif req.is_new_beneficiary and req.amount > 5000:
+        score += SIGNAL_WEIGHTS["beneficiary_trust_high"]
+        triggered.append("beneficiary_trust")
+
+    conv_score = req.conversational_deviation_score or 0
+    if conv_score > 70:
+        score += SIGNAL_WEIGHTS["conversational_risk_high"]
+        triggered.append("conversational_risk")
+    elif conv_score > 45:
+        score += SIGNAL_WEIGHTS["conversational_risk_medium"]
+        triggered.append("conversational_risk")
+    elif conv_score > 20:
+        score += SIGNAL_WEIGHTS["conversational_risk_low"]
+        triggered.append("conversational_risk")
+
+    if req.is_new_beneficiary and req.amount > 10000 and req.amount % 1000 == 0:
+        score += SIGNAL_WEIGHTS["round_number_check"]
+        triggered.append("round_number_check")
+
+    if score >= 90:
+        level, decision = "CRITICAL", "CRITICAL_BLOCK"
+        message = "This action has been blocked for your protection."
+        recommendation = "This high-risk action cannot be overridden."
+    elif score >= 60:
         level, decision = "HIGH", "BLOCK"
         message = "This action has been blocked due to high fraud risk signals. Please contact your bank or retry after 30 minutes."
         recommendation = "If this was you, log in again from your trusted device and retry."
@@ -79,8 +132,21 @@ def calculate_risk(req: RiskRequest) -> RiskResponse:
         message = "Action looks safe."
         recommendation = "All clear — proceed."
 
+    def _weight_for_signal(sig: str) -> int:
+        if sig == "velocity_check":
+            return SIGNAL_WEIGHTS["velocity_check_very_high"] if (req.actions_last_hour or 0) > 10 else SIGNAL_WEIGHTS["velocity_check_high"]
+        if sig == "beneficiary_trust":
+            return SIGNAL_WEIGHTS["beneficiary_trust_very_high"] if req.amount > 25000 else SIGNAL_WEIGHTS["beneficiary_trust_high"]
+        if sig == "conversational_risk":
+            if conv_score > 70:
+                return SIGNAL_WEIGHTS["conversational_risk_high"]
+            if conv_score > 45:
+                return SIGNAL_WEIGHTS["conversational_risk_medium"]
+            return SIGNAL_WEIGHTS["conversational_risk_low"]
+        return SIGNAL_WEIGHTS.get(sig, 0)
+
     explanation = {
-        sig: f"{SIGNAL_DESCRIPTIONS[sig]} (+{SIGNAL_WEIGHTS[sig]} points)"
+        sig: f"{SIGNAL_DESCRIPTIONS[sig]} (+{_weight_for_signal(sig)} points)"
         for sig in triggered
     }
 

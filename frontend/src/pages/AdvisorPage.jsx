@@ -42,6 +42,7 @@ export default function AdvisorPage() {
   const [aiStatus, setAiStatus] = useState({ running: false, modelLoaded: false })
   const [expandedReasoning, setExpandedReasoning] = useState({})
   const [summarySnapshot, setSummarySnapshot] = useState(null)
+  const [messageCount, setMessageCount] = useState(0)
 
   const messagesEndRef = useRef(null)
   const messagesContainerRef = useRef(null)
@@ -121,6 +122,12 @@ export default function AdvisorPage() {
         intent: data.intent
       }])
       showXPToast('Chat XP', 'Message sent', '+3 XP')
+      const nextCount = messageCount + 1
+      setMessageCount(nextCount)
+      if (nextCount % 5 === 0) {
+        // Kept for future threshold tuning; baseline update runs on every message.
+      }
+      nodeClient.post('/intent/update-baseline', { message: text }).catch(() => null)
       const gRes = await nodeClient.get('/gamification').catch(() => null)
       if (gRes?.data) setGamification(gRes.data)
     } catch (err) {

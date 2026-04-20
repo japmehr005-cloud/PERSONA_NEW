@@ -15,6 +15,12 @@ export default function AccountSetupPage() {
   const [editingGoalId, setEditingGoalId] = useState(null)
   const [goalAddAmount, setGoalAddAmount] = useState('')
   const [goalSetTotal, setGoalSetTotal] = useState('')
+  const [safePhrase, setSafePhrase] = useState('')
+  const [panicPhrase, setPanicPhrase] = useState('')
+  const [maskedSafePhrase, setMaskedSafePhrase] = useState('')
+  const [maskedPanicPhrase, setMaskedPanicPhrase] = useState('')
+  const [savingPhrases, setSavingPhrases] = useState(false)
+  const [phrasesSaved, setPhrasesSaved] = useState(false)
 
   const form = {
     balance: profile?.balance ?? 0,
@@ -34,9 +40,10 @@ export default function AccountSetupPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [pRes, gRes] = await Promise.all([
+        const [pRes, gRes, phraseRes] = await Promise.all([
           nodeClient.get('/profile'),
           nodeClient.get('/goals'),
+          nodeClient.get('/profile/safety-phrases').catch(() => ({ data: {} }))
         ])
         setProfile(pRes.data)
         setGoals(gRes.data)
@@ -52,6 +59,8 @@ export default function AccountSetupPage() {
           entertainment: pRes.data?.entertainment ?? 0,
           miscExpenses: pRes.data?.miscExpenses ?? 0,
         })
+        setMaskedSafePhrase(phraseRes?.data?.safePhrase || '')
+        setMaskedPanicPhrase(phraseRes?.data?.panicPhrase || '')
       } catch (err) {
         console.error(err)
       } finally {
@@ -144,6 +153,27 @@ export default function AccountSetupPage() {
     }
   }
 
+  const handleSavePhrases = async () => {
+    setSavingPhrases(true)
+    setPhrasesSaved(false)
+    try {
+      await nodeClient.put('/profile/safety-phrases', {
+        safePhrase: safePhrase || null,
+        panicPhrase: panicPhrase || null
+      })
+      const { data: phraseData } = await nodeClient.get('/profile/safety-phrases').catch(() => ({ data: {} }))
+      setMaskedSafePhrase(phraseData?.safePhrase || '')
+      setMaskedPanicPhrase(phraseData?.panicPhrase || '')
+      setSafePhrase('')
+      setPanicPhrase('')
+      setPhrasesSaved(true)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setSavingPhrases(false)
+    }
+  }
+
   if (loading) {
     return <div className="text-[var(--text-muted)]">Loading...</div>
   }
@@ -169,6 +199,55 @@ export default function AccountSetupPage() {
           </button>
         </div>
       )}
+
+      <div className="mb-6 rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4">
+        <h2 className="font-semibold text-[var(--text)] mb-1">🛡 Conversational Safety</h2>
+        <p className="text-sm text-[var(--text-muted)] mb-4">Set up personal phrases to protect yourself</p>
+
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm text-[var(--text)] mb-1">Safe Confirmation Phrase</label>
+            <input
+              type="text"
+              value={safePhrase}
+              onChange={(e) => setSafePhrase(e.target.value)}
+              placeholder="A phrase you naturally say when everything is fine"
+              className="w-full px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--text)]"
+            />
+            <p className="text-xs text-[var(--text-muted)] mt-1">
+              Type this in any chat to signal you are acting freely and confirm actions
+            </p>
+            {maskedSafePhrase && <p className="text-xs text-[var(--accent)] mt-1">Current: {maskedSafePhrase}</p>}
+          </div>
+
+          <div>
+            <label className="block text-sm text-[var(--text)] mb-1">Silent Distress Phrase</label>
+            <input
+              type="password"
+              value={panicPhrase}
+              onChange={(e) => setPanicPhrase(e.target.value)}
+              placeholder="A phrase that looks innocent but protects you silently"
+              className="w-full px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--text)]"
+            />
+            <p className="text-xs text-[var(--text-muted)] mt-1">
+              If you ever type this phrase in chat, we silently secure your account without alerting anyone around you
+            </p>
+            {maskedPanicPhrase && <p className="text-xs text-[var(--accent)] mt-1">Current: {maskedPanicPhrase}</p>}
+          </div>
+        </div>
+
+        <div className="mt-3 flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleSavePhrases}
+            disabled={savingPhrases}
+            className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-semibold disabled:opacity-50"
+          >
+            {savingPhrases ? 'Saving...' : 'Save Phrases'}
+          </button>
+          {phrasesSaved && <p className="text-sm text-[var(--success)]">Phrases saved successfully.</p>}
+        </div>
+      </div>
 
       <div className="mb-4 p-3 rounded-lg bg-[var(--surface-hover)] text-xs text-[var(--text-muted)]">
         * For simulation and demo purposes only. Not financial advice.

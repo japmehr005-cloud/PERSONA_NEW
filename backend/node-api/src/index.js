@@ -10,6 +10,7 @@ import gamificationRoutes from './routes/gamification.js'
 import securityRoutes from './routes/security.js'
 import simulateRiskRoutes from './routes/simulateRisk.js'
 import chatRoutes from './routes/chat.js'
+import intentSecurityRoutes from './routes/intentSecurity.js'
 
 const app = express()
 app.use(cors({
@@ -39,6 +40,8 @@ app.use('/api/gamification', gamificationRoutes)
 app.use('/api/security', securityRoutes)
 app.use('/api/simulate', simulateRiskRoutes)
 app.use('/api/chat', chatRoutes)
+app.use('/api/intent', intentSecurityRoutes)
+app.use('/api/profile', intentSecurityRoutes)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => console.log(`Node API running on ${PORT}`))

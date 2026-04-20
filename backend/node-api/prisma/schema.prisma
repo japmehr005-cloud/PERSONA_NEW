@@ -22,6 +22,7 @@ model User {
   sessions     UserSession[]
   gamification Gamification?
   riskEvents   RiskEvent[]
+  conversationalProfile ConversationalProfile?
 }
 
 model UserProfile {
@@ -115,4 +116,22 @@ model RiskEvent {
   createdAt        DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model ConversationalProfile {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id])
+  avgMessageLength      Float    @default(0)
+  avgWordsPerMessage    Float    @default(0)
+  slangRatio            Float    @default(0)
+  formalityScore        Float    @default(0)
+  emojiFrequency        Float    @default(0)
+  urgencyWordCount      Float    @default(0)
+  avgResponseTimeMs     Float    @default(0)
+  totalMessagesSampled  Int      @default(0)
+  panicPhrase           String?
+  safePhrase            String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 }

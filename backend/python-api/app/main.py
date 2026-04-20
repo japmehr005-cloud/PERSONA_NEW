@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from app.routers import risk, simulate, insights, chat
+from app.routers import risk, simulate, insights, chat, intent_security
 import os
 
 load_dotenv()
@@ -20,6 +20,7 @@ app.include_router(risk.router,     prefix="/risk",     tags=["Risk Engine"])
 app.include_router(simulate.router, prefix="/simulate", tags=["Simulations"])
 app.include_router(insights.router, prefix="/insights", tags=["Insights"])
 app.include_router(chat.router,     prefix="/chat",     tags=["Chat"])
+app.include_router(intent_security.router)
 
 @app.get("/")
 def root():

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import pythonClient from '../../api/pythonClient'
+import nodeClient from '../../api/nodeClient'
 import { useStore } from '../../store/useStore'
 export default function SplurgeChecker({ profile, primaryGoal, onSimulationSuccess }) {
   const setPendingAction = useStore((s) => s.setPendingAction)
@@ -41,6 +42,10 @@ export default function SplurgeChecker({ profile, primaryGoal, onSimulationSucce
           onConfirm: () => runSimulation(true),
           onCancel: clearPendingAction,
         })
+        setLoading(false)
+        return
+      }
+      if (riskRes?.status === 202 && riskRes?.data?.requiresIntentCheck) {
         setLoading(false)
         return
       }

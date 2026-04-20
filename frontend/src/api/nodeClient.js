@@ -13,7 +13,29 @@ nodeClient.interceptors.request.use((config) => {
 })
 
 nodeClient.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    if (res?.status === 202 && res?.data?.requiresIntentCheck) {
+      const pendingRequest = {
+        url: res.config?.url,
+        method: res.config?.method,
+        data: res.config?.data,
+        headers: res.config?.headers || {}
+      }
+      const intentData = {
+        ...res.data,
+        pendingRequest
+      }
+      window.dispatchEvent(new CustomEvent('intentCheckRequired', { detail: intentData }))
+      return Promise.resolve({
+        ...res,
+        data: {
+          ...res.data,
+          intentCheckDeferred: true
+        }
+      })
+    }
+    return res
+  },
   async (err) => {
     const requestUrl = err?.config?.url || ''
     const isAuthRoute = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register') || requestUrl.includes('/auth/refresh')
@@ -37,6 +59,27 @@ nodeClient.interceptors.response.use(
         window.location.href = '/login'
         return Promise.reject(err)
       }
+    }
+
+    if (err.response?.status === 202 && err.response?.data?.requiresIntentCheck) {
+      const pendingRequest = {
+        url: err.config?.url,
+        method: err.config?.method,
+        data: err.config?.data,
+        headers: err.config?.headers || {}
+      }
+      const intentData = {
+        ...err.response.data,
+        pendingRequest
+      }
+      window.dispatchEvent(new CustomEvent('intentCheckRequired', { detail: intentData }))
+      return Promise.resolve({
+        ...err.response,
+        data: {
+          ...err.response.data,
+          intentCheckDeferred: true
+        }
+      })
     }
     return Promise.reject(err)
   }

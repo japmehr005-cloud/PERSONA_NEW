@@ -1,8 +1,11 @@
 import axios from 'axios'
 import { prisma } from '../lib/prisma.js'
+import { redis } from '../lib/redis.js'
 
 export async function riskGate(req, res, next) {
-  const { userId, sessionId } = req.user
+  const userId = req.user.userId || req.user.id
+  const { sessionId } = req.user
+  const intentConfirmed = String(req.headers['x-intent-confirmed'] || '').toLowerCase() === 'true'
 
   const session = await prisma.userSession.findUnique({ where: { id: sessionId } })
   const profile = await prisma.userProfile.findUnique({ where: { userId } })
@@ -18,6 +21,19 @@ export async function riskGate(req, res, next) {
     ? Math.floor((Date.now() - new Date(session.loginAt).getTime()) / 1000)
     : 999
 
+  let actionsLastHour = 0
+  if (redis) {
+    try {
+      const actionKey = `actions:${userId}`
+      actionsLastHour = await redis.incr(actionKey)
+      if (actionsLastHour === 1) {
+        await redis.expire(actionKey, 3600)
+      }
+    } catch (err) {
+      console.warn('Redis action velocity tracking failed:', err.message)
+    }
+  }
+
   const riskPayload = {
     userId,
     actionType: req.body.actionType || 'GENERIC',
@@ -28,7 +44,13 @@ export async function riskGate(req, res, next) {
     isFirstTimeActionType: req.body.isFirstTimeActionType ?? false,
     retryCount: req.body.retryCount ?? 0,
     userAvgTransactionAmount: avgAmount,
-    securityScore: req.body.securityScore ?? computeSecurityScore(profile)
+    securityScore: req.body.securityScore ?? computeSecurityScore(profile),
+    hour_of_day: new Date().getHours(),
+    user_typical_hours: req.body.userTypicalHours ?? [9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
+    actions_last_hour: req.body.actionsLastHour ?? actionsLastHour ?? 0,
+    is_new_beneficiary: req.body.isNewBeneficiary ?? false,
+    previous_transfer_count_to_beneficiary: req.body.previousTransferCount ?? 0,
+    conversational_deviation_score: req.body.conversationalDeviationScore ?? 0
   }
 
   try {
@@ -50,29 +72,53 @@ export async function riskGate(req, res, next) {
       }
     })
 
-    if (riskResult.decision === 'BLOCK') {
+    if (riskResult.riskScore >= 90 || riskResult.decision === 'CRITICAL_BLOCK') {
       return res.status(403).json({
         blocked: true,
+        critical: true,
+        decision: 'CRITICAL_BLOCK',
+        message: 'This action has been blocked for your protection',
+        signals: riskResult.triggeredSignals || [],
         riskScore: riskResult.riskScore,
-        riskLevel: riskResult.riskLevel,
-        message: riskResult.message,
-        explanation: riskResult.explanation,
-        recommendation: riskResult.recommendation
+        riskLevel: riskResult.riskLevel
       })
     }
 
-    if (riskResult.decision === 'WARN') {
-      if (!req.body.userConfirmed) {
+    if (riskResult.riskScore >= 30 && riskResult.riskScore <= 89) {
+      if (!intentConfirmed) {
         return res.status(202).json({
-          requiresConfirmation: true,
+          requiresIntentCheck: true,
           riskScore: riskResult.riskScore,
+          riskLevel: riskResult.riskLevel,
+          signals: riskResult.triggeredSignals || [],
+          triggeredSignals: riskResult.triggeredSignals || [],
+          decision: 'INTENT_CHECK_REQUIRED',
+          message: 'We need to verify your intent before proceeding',
+          chatbot_message: 'Before we proceed, please confirm this action in your own words.',
+          recommended_action: 'PROCEED_WITH_CONFIRMATION',
+          show_cooloff_option: false,
+          silent_block: false,
+          actionType: riskPayload.actionType,
+          actionDetails: {
+            amount: riskPayload.amount,
+            isNewBeneficiary: riskPayload.is_new_beneficiary
+          },
+          explanation: riskResult.explanation,
+          recommendation: riskResult.recommendation
+        })
+      }
+    }
+
+    if (riskResult.decision === 'BLOCK' && !intentConfirmed) {
+      return res.status(403).json({
+        blocked: true,
+        riskScore: riskResult.riskScore,
           riskLevel: riskResult.riskLevel,
           message: riskResult.message,
           explanation: riskResult.explanation,
           recommendation: riskResult.recommendation
         })
       }
-    }
 
     req.riskResult = riskResult
     next()
