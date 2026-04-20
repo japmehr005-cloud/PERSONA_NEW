@@ -6,6 +6,39 @@ import { addXP } from '../services/xpService.js'
 
 const router = express.Router()
 
+function parseAmountFromMessage(message) {
+  const text = String(message || '').toLowerCase()
+  const rupeeMatch = text.match(/₹\s*([\d,]+(?:\.\d+)?)/i)
+  if (rupeeMatch) return Number(String(rupeeMatch[1]).replace(/,/g, ''))
+
+  const kMatch = text.match(/\b(\d+(?:\.\d+)?)\s*k\b/i)
+  if (kMatch) return Number(kMatch[1]) * 1000
+
+  const thousandMatch = text.match(/\b(\d+(?:\.\d+)?)\s*thousand\b/i)
+  if (thousandMatch) return Number(thousandMatch[1]) * 1000
+
+  const lakhMatch = text.match(/\b(\d+(?:\.\d+)?)\s*lakh\b/i)
+  if (lakhMatch) return Number(lakhMatch[1]) * 100000
+
+  const rawNumber = text.match(/\b(\d{4,})\b/)
+  if (rawNumber) return Number(rawNumber[1])
+  return null
+}
+
+function detectFinancialAction(message) {
+  const text = String(message || '').toLowerCase()
+  const groups = [
+    { type: 'transfer', keywords: ['transfer', 'send money', 'move funds', 'send to'] },
+    { type: 'purchase', keywords: ['buy', 'purchase', 'spend', 'pay for'] },
+    { type: 'investment', keywords: ['invest', 'put money', 'move to', 'shift to'] }
+  ]
+  for (const group of groups) {
+    const found = group.keywords.find((kw) => text.includes(kw))
+    if (found) return { detectedAction: found, detectedType: group.type }
+  }
+  return { detectedAction: null, detectedType: null }
+}
+
 function computeSecurityScore(profile) {
   if (!profile) return 0
   let score = 0
@@ -80,7 +113,20 @@ router.post('/', authMiddleware, async (req, res) => {
     )
 
     await addXP(userId, 3)
-    res.json(data)
+    const amount = parseAmountFromMessage(message)
+    const actionDetected = detectFinancialAction(message)
+    const financialActionDetected = Boolean(actionDetected.detectedAction && amount && amount > 1000)
+
+    res.json({
+      ...data,
+      financialActionDetected,
+      detectedAmount: financialActionDetected ? amount : null,
+      detectedAction: financialActionDetected ? actionDetected.detectedAction : null,
+      intentCheckSuggested: financialActionDetected,
+      intentMessage: financialActionDetected
+        ? 'I noticed you mentioned a financial action. Would you like me to help you execute this safely?'
+        : null
+    })
   } catch (err) {
     console.error('Chat route error:', err.message)
     res.status(500).json({ message: 'Chat failed', error: err.message })

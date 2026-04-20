@@ -19,25 +19,39 @@ export default function useIntentCheck() {
   }, [])
 
   const confirmAndRetry = useCallback(async () => {
-    if (!pendingRequest?.url || !pendingRequest?.method) return null
+    if (!pendingRequest?.url || !pendingRequest?.method) {
+      window.dispatchEvent(new CustomEvent('intentCheckResolved', {
+        detail: { confirmed: true, intentData, response: null }
+      }))
+      return null
+    }
     const method = String(pendingRequest.method).toLowerCase()
     const headers = {
       ...(pendingRequest.headers || {}),
-      'X-Intent-Confirmed': 'true'
+      'X-Intent-Confirmed': 'true',
+      'X-Confirmed-At': new Date().toISOString()
     }
-    return nodeClient.request({
+    const response = await nodeClient.request({
       url: pendingRequest.url,
       method,
       data: pendingRequest.data,
-      headers
+      headers,
+      params: pendingRequest.params
     })
+    window.dispatchEvent(new CustomEvent('intentCheckResolved', {
+      detail: { confirmed: true, intentData, response }
+    }))
+    return response
   }, [pendingRequest])
 
   const cancelIntent = useCallback(() => {
+    window.dispatchEvent(new CustomEvent('intentCheckResolved', {
+      detail: { confirmed: false, intentData, response: null }
+    }))
     setIntentCheckActive(false)
     setIntentData(null)
     setPendingRequest(null)
-  }, [])
+  }, [intentData])
 
   return {
     intentCheckActive,

@@ -134,6 +134,7 @@ def score_deviation(message: str, baseline: dict) -> dict:
     baseline_formality = float(baseline.get("formality_score", 0) or 0)
     baseline_length = float(baseline.get("avg_message_length", 0) or 0)
     baseline_slang = float(baseline.get("slang_ratio", 0) or 0)
+    total_messages_sampled = int(baseline.get("total_messages_sampled", baseline.get("totalMessagesSampled", 0)) or 0)
 
     current_formality = _message_formality_score(msg)
     current_slang_count = sum(1 for word in words if word in SLANG_WORDS)
@@ -143,6 +144,20 @@ def score_deviation(message: str, baseline: dict) -> dict:
     triggered = []
     score = 0
     lowered = msg.lower()
+
+    third_party_detected = any(pattern in lowered for pattern in THIRD_PARTY_PATTERNS)
+    confusion_detected = any(pattern in lowered for pattern in CONFUSION_PATTERNS)
+
+    if total_messages_sampled < 5:
+        return {
+            "deviation_score": 0,
+            "triggered_signals": [],
+            "risk_level": "LOW",
+            "baseline_mature": False,
+            "urgency_detected": urgency_hits > 0,
+            "third_party_detected": third_party_detected,
+            "confusion_detected": confusion_detected,
+        }
 
     if abs(current_formality - baseline_formality) > 35:
         score += 20
@@ -174,7 +189,6 @@ def score_deviation(message: str, baseline: dict) -> dict:
             "explanation": "You are communicating much more formally than usual"
         })
 
-    third_party_detected = any(pattern in lowered for pattern in THIRD_PARTY_PATTERNS)
     if third_party_detected:
         score += 25
         triggered.append({
@@ -190,7 +204,6 @@ def score_deviation(message: str, baseline: dict) -> dict:
             "explanation": "Combination of urgency and financial action is a fraud signal"
         })
 
-    confusion_detected = any(pattern in lowered for pattern in CONFUSION_PATTERNS)
     if confusion_detected:
         score += 10
         triggered.append({
@@ -211,6 +224,10 @@ def score_deviation(message: str, baseline: dict) -> dict:
         "deviation_score": min(score, 100),
         "triggered_signals": triggered,
         "risk_level": risk_level,
+        "baseline_mature": True,
+        "urgency_detected": urgency_hits > 0,
+        "third_party_detected": third_party_detected,
+        "confusion_detected": confusion_detected,
     }
 
 
@@ -225,10 +242,30 @@ def classify_intent(message: str, deviation_result: dict, action_type: str) -> d
     amount_match = re.search(r"\b\d{4,}\b", message)
     involves_large_amount = bool(amount_match) or "large" in action_type
 
-    urgency_signal = "Urgency Language Detected" in signal_names
-    third_party_signal = "Third Party Influence Detected" in signal_names
+    urgency_signal = "Urgency Language Detected" in signal_names or bool(deviation_result.get("urgency_detected"))
+    third_party_signal = "Third Party Influence Detected" in signal_names or bool(deviation_result.get("third_party_detected"))
     uncertainty_signal = "Decision Uncertainty" in signal_names
     panic_flag = bool(deviation_result.get("panic_phrase_detected", False))
+    baseline_mature = bool(deviation_result.get("baseline_mature", True))
+
+    if not baseline_mature:
+        if urgency_signal and third_party_signal:
+            return {
+                "intent": "COERCED",
+                "confidence": "HIGH",
+                "reasoning": "Urgency plus third-party direction detected while baseline is still learning."
+            }
+        if urgency_signal or third_party_signal:
+            return {
+                "intent": "PRESSURED",
+                "confidence": "MEDIUM",
+                "reasoning": "Early warning signals detected before behavioural baseline matures."
+            }
+        return {
+            "intent": "GENUINE",
+            "confidence": "HIGH",
+            "reasoning": "Baseline is still maturing; no pressure signals detected."
+        }
 
     if deviation_score > 65 or panic_flag or (third_party_signal and urgency_signal):
         return {
@@ -258,7 +295,7 @@ def classify_intent(message: str, deviation_result: dict, action_type: str) -> d
     }
 
 
-def generate_security_response(intent: str, action_type: str, action_details: dict) -> dict:
+def generate_security_response(intent: str, action_type: str, action_details: dict, baseline_mature: bool = True) -> dict:
     action_type = action_type or "this action"
     action_details = action_details or {}
     amount = action_details.get("amount")
@@ -272,6 +309,16 @@ def generate_security_response(intent: str, action_type: str, action_details: di
         key_detail = "the selected details"
 
     if intent == "GENUINE":
+        if not baseline_mature:
+            return {
+                "chatbot_message": (
+                    f"Just to confirm — you want to {action_type} for {key_detail}. "
+                    "Is that correct? This is a quick safety check we do for significant actions."
+                ),
+                "recommended_action": "PROCEED_WITH_CONFIRMATION",
+                "show_cooloff_option": False,
+                "silent_block": False,
+            }
         return {
             "chatbot_message": (
                 f"I can see you want to {action_type}. Just to confirm — {key_detail}. Is that right?"

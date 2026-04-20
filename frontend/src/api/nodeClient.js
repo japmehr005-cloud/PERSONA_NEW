@@ -6,6 +6,12 @@ const nodeClient = axios.create({
   withCredentials: true,
 })
 
+function emitIntentCheck(detail) {
+  setTimeout(() => {
+    window.dispatchEvent(new CustomEvent('intentCheckRequired', { detail }))
+  }, 100)
+}
+
 nodeClient.interceptors.request.use((config) => {
   const token = useStore.getState().accessToken
   if (token) config.headers.Authorization = `Bearer ${token}`
@@ -19,13 +25,14 @@ nodeClient.interceptors.response.use(
         url: res.config?.url,
         method: res.config?.method,
         data: res.config?.data,
-        headers: res.config?.headers || {}
+        headers: res.config?.headers || {},
+        params: res.config?.params
       }
       const intentData = {
         ...res.data,
         pendingRequest
       }
-      window.dispatchEvent(new CustomEvent('intentCheckRequired', { detail: intentData }))
+      emitIntentCheck(intentData)
       return Promise.resolve({
         ...res,
         data: {
@@ -66,13 +73,14 @@ nodeClient.interceptors.response.use(
         url: err.config?.url,
         method: err.config?.method,
         data: err.config?.data,
-        headers: err.config?.headers || {}
+        headers: err.config?.headers || {},
+        params: err.config?.params
       }
       const intentData = {
         ...err.response.data,
         pendingRequest
       }
-      window.dispatchEvent(new CustomEvent('intentCheckRequired', { detail: intentData }))
+      emitIntentCheck(intentData)
       return Promise.resolve({
         ...err.response,
         data: {

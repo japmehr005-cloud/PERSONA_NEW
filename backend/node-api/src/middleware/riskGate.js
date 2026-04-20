@@ -6,9 +6,20 @@ export async function riskGate(req, res, next) {
   const userId = req.user.userId || req.user.id
   const { sessionId } = req.user
   const intentConfirmed = String(req.headers['x-intent-confirmed'] || '').toLowerCase() === 'true'
+  const actionType = req.body.actionType || 'GENERIC'
+
+  if (intentConfirmed) {
+    console.log('Intent confirmed bypass for userId:', userId)
+    if (redis) {
+      const ts = Date.now()
+      await redis.set(`intent_confirmed:${userId}:${ts}`, actionType, 'EX', 3600).catch(() => null)
+    }
+    return next()
+  }
 
   const session = await prisma.userSession.findUnique({ where: { id: sessionId } })
   const profile = await prisma.userProfile.findUnique({ where: { userId } })
+  const conversationalProfile = await prisma.conversationalProfile.findUnique({ where: { userId } })
 
   const txns = await prisma.transaction.findMany({
     where: { userId },
@@ -34,9 +45,23 @@ export async function riskGate(req, res, next) {
     }
   }
 
+  const monthlySavings = profile
+    ? (
+        (Number(profile.salary || 0) + Number(profile.otherIncome || 0)) -
+        (
+          Number(profile.rent || 0) +
+          Number(profile.food || 0) +
+          Number(profile.transport || 0) +
+          Number(profile.subscriptions || 0) +
+          Number(profile.entertainment || 0) +
+          Number(profile.miscExpenses || 0)
+        )
+      )
+    : 0
+
   const riskPayload = {
     userId,
-    actionType: req.body.actionType || 'GENERIC',
+    actionType,
     amount: req.body.amount ?? 0,
     sessionAgeSeconds,
     isNewDevice: !session?.isTrustedDevice,
@@ -60,67 +85,124 @@ export async function riskGate(req, res, next) {
       { timeout: 5000 }
     )
 
+    // Local additive signal for high balance-percentage splurges.
+    let boostedScore = Number(riskResult.riskScore || 0)
+    const boostedSignals = [...(riskResult.triggeredSignals || [])]
+    const boostedExplanation = { ...(riskResult.explanation || {}) }
+    const splurgePct = Number(req.body.splurgePercentageOfBalance || 0)
+    if (req.body.isHighPercentageSplurge === true) {
+      const boost = splurgePct > 75 ? 55 : 35
+      boostedScore += boost
+      boostedSignals.push('Large Percentage of Balance')
+      boostedExplanation['Large Percentage of Balance'] =
+        `This purchase represents more than 50% of your current balance (+${boost} points)`
+    }
+
+    let boostedDecision = riskResult.decision
+    let boostedLevel = riskResult.riskLevel
+    let boostedMessage = riskResult.message
+    let boostedRecommendation = riskResult.recommendation
+
+    if (boostedScore >= 90) {
+      boostedDecision = 'CRITICAL_BLOCK'
+      boostedLevel = 'CRITICAL'
+      boostedMessage = 'This action has been blocked for your protection'
+      boostedRecommendation = 'This action cannot be overridden'
+    } else if (boostedScore >= 60) {
+      boostedDecision = 'BLOCK'
+      boostedLevel = 'HIGH'
+    } else if (boostedScore >= 30) {
+      boostedDecision = 'WARN'
+      boostedLevel = 'MEDIUM'
+    } else {
+      boostedDecision = 'ALLOW'
+      boostedLevel = 'LOW'
+    }
+
     await prisma.riskEvent.create({
       data: {
         userId,
         actionType: riskPayload.actionType,
         amount: riskPayload.amount,
-        riskScore: riskResult.riskScore,
-        riskLevel: riskResult.riskLevel,
-        decision: riskResult.decision,
-        triggeredSignals: riskResult.triggeredSignals || []
+        riskScore: boostedScore,
+        riskLevel: boostedLevel,
+        decision: boostedDecision,
+        triggeredSignals: boostedSignals
       }
     })
 
-    if (riskResult.riskScore >= 90 || riskResult.decision === 'CRITICAL_BLOCK') {
+    if (boostedScore >= 90 || boostedDecision === 'CRITICAL_BLOCK') {
       return res.status(403).json({
         blocked: true,
         critical: true,
         decision: 'CRITICAL_BLOCK',
         message: 'This action has been blocked for your protection',
-        signals: riskResult.triggeredSignals || [],
-        riskScore: riskResult.riskScore,
-        riskLevel: riskResult.riskLevel
+        signals: boostedSignals,
+        riskScore: boostedScore,
+        riskLevel: boostedLevel
       })
     }
 
-    if (riskResult.riskScore >= 30 && riskResult.riskScore <= 89) {
-      if (!intentConfirmed) {
-        return res.status(202).json({
-          requiresIntentCheck: true,
-          riskScore: riskResult.riskScore,
-          riskLevel: riskResult.riskLevel,
-          signals: riskResult.triggeredSignals || [],
-          triggeredSignals: riskResult.triggeredSignals || [],
-          decision: 'INTENT_CHECK_REQUIRED',
-          message: 'We need to verify your intent before proceeding',
-          chatbot_message: 'Before we proceed, please confirm this action in your own words.',
-          recommended_action: 'PROCEED_WITH_CONFIRMATION',
-          show_cooloff_option: false,
-          silent_block: false,
-          actionType: riskPayload.actionType,
-          actionDetails: {
-            amount: riskPayload.amount,
-            isNewBeneficiary: riskPayload.is_new_beneficiary
-          },
-          explanation: riskResult.explanation,
-          recommendation: riskResult.recommendation
-        })
-      }
+    const baselineMature = Number(conversationalProfile?.totalMessagesSampled || 0) >= 5
+    const significantBySavings =
+      Number(monthlySavings || 0) > 0 &&
+      Number(riskPayload.amount || 0) > Number(monthlySavings) * 0.3
+    const shouldIntentCheckMature =
+      baselineMature &&
+      boostedScore >= 20 &&
+      boostedScore <= 89 &&
+      significantBySavings
+    const shouldIntentCheckNewUser =
+      !baselineMature &&
+      boostedScore >= 25 &&
+      boostedScore <= 89
+
+    if (shouldIntentCheckMature || shouldIntentCheckNewUser) {
+      return res.status(202).json({
+        requiresIntentCheck: true,
+        riskScore: boostedScore,
+        riskLevel: boostedLevel,
+        signals: boostedSignals,
+        triggeredSignals: boostedSignals,
+        decision: 'INTENT_CHECK_REQUIRED',
+        message: 'We need to verify your intent before proceeding',
+        chatbot_message: 'Before we proceed, please confirm this action in your own words.',
+        recommended_action: 'PROCEED_WITH_CONFIRMATION',
+        show_cooloff_option: false,
+        silent_block: false,
+        actionType: riskPayload.actionType,
+        actionDetails: {
+          amount: riskPayload.amount,
+          isNewBeneficiary: riskPayload.is_new_beneficiary
+        },
+        explanation: boostedExplanation,
+        recommendation: boostedRecommendation,
+        baselineMature,
+        totalMessagesSampled: Number(conversationalProfile?.totalMessagesSampled || 0)
+      })
     }
 
-    if (riskResult.decision === 'BLOCK' && !intentConfirmed) {
+    if (boostedDecision === 'BLOCK') {
       return res.status(403).json({
         blocked: true,
-        riskScore: riskResult.riskScore,
-          riskLevel: riskResult.riskLevel,
-          message: riskResult.message,
-          explanation: riskResult.explanation,
-          recommendation: riskResult.recommendation
-        })
-      }
+        riskScore: boostedScore,
+        riskLevel: boostedLevel,
+        message: boostedMessage,
+        explanation: boostedExplanation,
+        recommendation: boostedRecommendation
+      })
+    }
 
-    req.riskResult = riskResult
+    req.riskResult = {
+      ...riskResult,
+      riskScore: boostedScore,
+      riskLevel: boostedLevel,
+      decision: boostedDecision,
+      triggeredSignals: boostedSignals,
+      explanation: boostedExplanation,
+      message: boostedMessage,
+      recommendation: boostedRecommendation
+    }
     next()
   } catch (err) {
     console.error('Risk engine error:', err.message)

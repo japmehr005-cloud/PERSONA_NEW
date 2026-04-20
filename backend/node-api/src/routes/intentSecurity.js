@@ -89,4 +89,20 @@ router.get('/safety-phrases', authenticateToken, async (req, res) => {
   }
 })
 
+router.get('/conversational-status', authenticateToken, async (req, res) => {
+  try {
+    const profile = await getOrCreateProfile(req.user.id, prisma)
+    const totalMessagesSampled = Number(profile.totalMessagesSampled || 0)
+    return res.json({
+      totalMessagesSampled,
+      baselineMature: totalMessagesSampled >= 5,
+      hasPanicPhrase: Boolean(profile.panicPhrase),
+      hasSafePhrase: Boolean(profile.safePhrase)
+    })
+  } catch (err) {
+    console.error('Failed to get conversational status:', err.message)
+    return res.status(500).json({ error: 'Failed to fetch conversational status' })
+  }
+})
+
 export default router

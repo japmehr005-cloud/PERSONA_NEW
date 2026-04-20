@@ -25,6 +25,7 @@ export default function IntentConfirmationModal({ data, onConfirm, onCancel }) {
   const [sending, setSending] = useState(false)
   const [analysis, setAnalysis] = useState(data || {})
   const [scheduledAt, setScheduledAt] = useState(null)
+  const [manualConfirmFallback, setManualConfirmFallback] = useState(false)
 
   useEffect(() => {
     setAnalysis(data || {})
@@ -62,6 +63,27 @@ export default function IntentConfirmationModal({ data, onConfirm, onCancel }) {
   async function sendIntentMessage() {
     if (!input.trim() || sending) return
     const text = input.trim()
+    const lowerText = text.toLowerCase()
+
+    if (manualConfirmFallback) {
+      setMessages((prev) => [...prev, { role: 'user', content: text }])
+      setInput('')
+      if (['yes', 'y', 'proceed'].includes(lowerText)) {
+        await onConfirm?.()
+        onCancel?.()
+        return
+      }
+      if (['no', 'n', 'cancel'].includes(lowerText)) {
+        onCancel?.()
+        return
+      }
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: 'Please reply with yes or no so I can continue safely.' }
+      ])
+      return
+    }
+
     setMessages((prev) => [...prev, { role: 'user', content: text }])
     setInput('')
     setSending(true)
@@ -79,7 +101,14 @@ export default function IntentConfirmationModal({ data, onConfirm, onCancel }) {
         setScheduledAt(at)
       }
     } catch {
-      setMessages((prev) => [...prev, { role: 'assistant', content: 'I could not verify that just now. Please try again.' }])
+      setManualConfirmFallback(true)
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: 'I had trouble analysing that. Please confirm manually — do you want to proceed with this action? (yes/no)'
+        }
+      ])
     } finally {
       setSending(false)
     }

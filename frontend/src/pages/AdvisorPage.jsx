@@ -119,7 +119,13 @@ export default function AdvisorPage() {
         content: data.reply,
         reasoning: data.reasoning,
         suggestedActions: data.suggestedActions,
-        intent: data.intent
+        intent: data.intent,
+        financialActionDetected: data.financialActionDetected,
+        detectedAmount: data.detectedAmount,
+        detectedAction: data.detectedAction,
+        intentCheckSuggested: data.intentCheckSuggested,
+        intentMessage: data.intentMessage,
+        dismissedIntentCard: false
       }])
       showXPToast('Chat XP', 'Message sent', '+3 XP')
       const nextCount = messageCount + 1
@@ -155,6 +161,42 @@ export default function AdvisorPage() {
       const prompt = INTENT_TO_PROMPT[intent] || actionObj.label
       sendMessage(prompt)
     }
+  }
+
+  const dismissIntentCard = (idx) => {
+    setMessages((prev) => prev.map((msg, i) => (
+      i === idx ? { ...msg, dismissedIntentCard: true } : msg
+    )))
+  }
+
+  const triggerIntentCheckFromChat = (msg) => {
+    const payload = {
+      requiresIntentCheck: true,
+      chatbot_message: msg.intentMessage || 'Before proceeding, please confirm this action.',
+      recommended_action: 'PROCEED_WITH_CONFIRMATION',
+      actionType: 'CHAT_FINANCIAL_ACTION',
+      actionDetails: {
+        amount: msg.detectedAmount || 0,
+        action: msg.detectedAction || 'financial action'
+      },
+      riskScore: 25,
+      riskLevel: 'MEDIUM',
+      signals: [{ name: 'Financial action in chat', explanation: 'User mentioned a potentially executable money action.' }],
+      pendingRequest: {
+        url: '/intent/check',
+        method: 'post',
+        data: JSON.stringify({
+          message: `Please proceed with ${msg.detectedAction || 'this action'} of ₹${msg.detectedAmount || 0}`,
+          actionType: 'CHAT_FINANCIAL_ACTION',
+          actionDetails: {
+            amount: msg.detectedAmount || 0,
+            action: msg.detectedAction || 'financial action'
+          }
+        }),
+        headers: {}
+      }
+    }
+    window.dispatchEvent(new CustomEvent('intentCheckRequired', { detail: payload }))
   }
 
   useEffect(() => {
@@ -286,6 +328,30 @@ export default function AdvisorPage() {
                 </div>
                 {!isUser && (
                   <div className="mt-2 space-y-2">
+                    {msg.intentCheckSuggested && !msg.dismissedIntentCard && (
+                      <div className="border border-yellow-500 bg-yellow-500/10 rounded-xl p-3 mt-2">
+                        <p className="text-sm font-semibold text-yellow-300">⚡ Financial action detected</p>
+                        <p className="text-xs text-yellow-100 mt-1">
+                          You mentioned {msg.detectedAction || 'an action'} of ₹{Number(msg.detectedAmount || 0).toLocaleString('en-IN')}
+                        </p>
+                        <div className="flex gap-2 mt-3">
+                          <button
+                            type="button"
+                            onClick={() => triggerIntentCheckFromChat(msg)}
+                            className="px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-semibold"
+                          >
+                            Execute this safely
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => dismissIntentCard(idx)}
+                            className="px-3 py-1.5 rounded-lg border border-[var(--border)] text-[var(--text-muted)] text-xs"
+                          >
+                            Just talking
+                          </button>
+                        </div>
+                      </div>
+                    )}
                     {msg.reasoning && (
                       <div className="text-xs">
                         <button

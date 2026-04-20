@@ -57,12 +57,18 @@ def analyse_intent(req: AnalyseIntentRequest):
 
     deviation_result = score_deviation(message, req.conversationalProfile or {})
     intent_result = classify_intent(message, deviation_result, req.actionType)
-    response_result = generate_security_response(intent_result["intent"], req.actionType, req.actionDetails)
+    response_result = generate_security_response(
+        intent_result["intent"],
+        req.actionType,
+        req.actionDetails,
+        bool(deviation_result.get("baseline_mature", True)),
+    )
 
     return {
         "deviation_score": deviation_result["deviation_score"],
         "risk_level": deviation_result["risk_level"],
         "triggered_signals": deviation_result["triggered_signals"],
+        "baseline_mature": deviation_result.get("baseline_mature", True),
         "intent": intent_result["intent"],
         "confidence": intent_result["confidence"],
         "reasoning": intent_result["reasoning"],
