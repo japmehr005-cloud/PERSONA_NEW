@@ -197,11 +197,16 @@ export default function SecurityPage() {
                       </div>
                       {signals.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
-                          {signals.map((signal) => (
-                            <span key={signal} className="text-[10px] px-2 py-0.5 rounded bg-[var(--surface-hover)] text-[var(--text-muted)]">
-                              {signal.replace(/_/g, ' ')}
+                          {signals.map((signal, idx) => {
+                            const signalLabel = typeof signal === 'string'
+                              ? signal
+                              : (signal?.name || signal?.label || JSON.stringify(signal))
+                            return (
+                            <span key={`${event.id}-sig-${idx}`} className="text-[10px] px-2 py-0.5 rounded bg-[var(--surface-hover)] text-[var(--text-muted)]">
+                              {String(signalLabel).replace(/_/g, ' ')}
                             </span>
-                          ))}
+                            )
+                          })}
                         </div>
                       )}
                     </div>
