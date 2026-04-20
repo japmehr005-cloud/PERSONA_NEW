@@ -9,9 +9,11 @@ export default function useIntentCheck() {
   useEffect(() => {
     const onIntentCheckRequired = (event) => {
       const detail = event?.detail || {}
-      setIntentData(detail)
-      setPendingRequest(detail.pendingRequest || null)
-      setIntentCheckActive(true)
+      setTimeout(() => {
+        setIntentData(detail)
+        setPendingRequest(detail.pendingRequest || null)
+        setIntentCheckActive(true)
+      }, 100)
     }
 
     window.addEventListener('intentCheckRequired', onIntentCheckRequired)

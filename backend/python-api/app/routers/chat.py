@@ -41,15 +41,25 @@ class ChatResponse(BaseModel):
     intent: str
     reasoning: str
     suggestedActions: list
+    distressDetected: bool = False
+    accountProtected: bool = False
 
 @router.post("/", response_model=ChatResponse)
 def chat(req: ChatRequest):
     intent = detect_intent(req.message)
-    reply = generate_response(
+    generated = generate_response(
         req.message,
         req.userContext.dict(),
         [h.dict() for h in req.conversationHistory]
     )
+    if isinstance(generated, dict):
+        reply = generated.get("reply", "")
+        distress_detected = bool(generated.get("distressDetected", False))
+        account_protected = bool(generated.get("accountProtected", False))
+    else:
+        reply = generated
+        distress_detected = False
+        account_protected = False
     actions = get_suggested_actions(intent)
     reasoning = (
         f"Intent detected: {intent}. "
@@ -57,7 +67,14 @@ def chat(req: ChatRequest):
         f"Savings rate {req.userContext.savingsRate:.1f}%, "
         f"goal {req.userContext.primaryGoalPct:.0f}% complete."
     )
-    return ChatResponse(reply=reply, intent=intent, reasoning=reasoning, suggestedActions=actions)
+    return ChatResponse(
+        reply=reply,
+        intent=intent,
+        reasoning=reasoning,
+        suggestedActions=actions,
+        distressDetected=distress_detected,
+        accountProtected=account_protected,
+    )
 
 @router.get("/health")
 def chat_health():

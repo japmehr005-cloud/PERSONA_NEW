@@ -6,6 +6,17 @@ from math import ceil
 
 load_dotenv()
 
+DISTRESS_WORDS = [
+    'panic', 'scam', 'scared', 'afraid', 'threatened',
+    'blackmail', 'forced', 'help me', 'dont tell anyone',
+    'keep this secret', 'being watched', 'danger',
+    'they will hurt', 'gun', 'knife', 'weapon',
+    'fake police', 'fake officer', 'rbi called me',
+    'income tax raid', 'cyber crime officer',
+    'arrest warrant', 'your account is hacked',
+    'send money or else', 'transfer or else'
+]
+
 def detect_intent(message: str) -> str:
     msg = message.lower()
     if any(w in msg for w in ["buy", "purchase", "afford", "concert", "ticket", "shoes", "jeans", "phone", "laptop", "trip", "spend", "splurge"]):
@@ -77,9 +88,26 @@ RULES:
 - Use simple language
 - Maximum one emoji per response
 - No slang
+- If the user mentions panic, scam, being threatened, being forced, or any distress signals — immediately stop giving financial advice and instead respond with empathy and safety information. Tell them their account is protected and no transaction is needed right now. Mention the cyber crime helpline 1930.
 """
 
-def generate_response(message: str, uc: dict, history: list) -> str:
+def generate_response(message: str, uc: dict, history: list):
+    lowered = (message or '').lower()
+    if any(word in lowered for word in DISTRESS_WORDS):
+        return {
+            "reply": (
+                "I want to make sure you are okay. "
+                "I noticed something in your message that concerns me. "
+                "Your account is being protected right now. "
+                "If someone is asking you to transfer money urgently — "
+                "that is almost always a scam. Real banks and police "
+                "never ask you to transfer money to stay safe. "
+                "Please take a breath. You do not need to do anything right now."
+            ),
+            "distressDetected": True,
+            "accountProtected": True
+        }
+
     system_prompt = build_system_prompt(uc)
 
     messages = [{"role": "system", "content": system_prompt}]

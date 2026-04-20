@@ -10,6 +10,7 @@ import AchievementsPage from './pages/AchievementsPage'
 import AdvisorPage from './pages/AdvisorPage'
 import XPToast from './components/layout/XPToast'
 import RiskInterceptModal from './components/security/RiskInterceptModal'
+import ErrorBoundary from './components/shared/ErrorBoundary'
 
 function ProtectedRoute({ children }) {
   const accessToken = useStore((s) => s.accessToken)
@@ -32,20 +33,20 @@ export default function App() {
         />
       )}
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login" element={<ErrorBoundary><LoginPage /></ErrorBoundary>} />
         <Route
           path="/*"
           element={
             <ProtectedRoute>
               <AppLayout>
                 <Routes>
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                  <Route path="/dashboard" element={<DashboardPage />} />
-                  <Route path="/account" element={<AccountSetupPage />} />
-                  <Route path="/simulate" element={<SimulatePage />} />
-                  <Route path="/security" element={<SecurityPage />} />
-                  <Route path="/advisor" element={<ProtectedRoute><AdvisorPage /></ProtectedRoute>} />
-                  <Route path="/achievements" element={<AchievementsPage />} />
+                  <Route path="/" element={<ErrorBoundary><Navigate to="/dashboard" replace /></ErrorBoundary>} />
+                  <Route path="/dashboard" element={<ErrorBoundary><DashboardPage /></ErrorBoundary>} />
+                  <Route path="/account" element={<ErrorBoundary><AccountSetupPage /></ErrorBoundary>} />
+                  <Route path="/simulate" element={<ErrorBoundary><SimulatePage /></ErrorBoundary>} />
+                  <Route path="/security" element={<ErrorBoundary><SecurityPage /></ErrorBoundary>} />
+                  <Route path="/advisor" element={<ErrorBoundary><ProtectedRoute><AdvisorPage /></ProtectedRoute></ErrorBoundary>} />
+                  <Route path="/achievements" element={<ErrorBoundary><AchievementsPage /></ErrorBoundary>} />
                 </Routes>
               </AppLayout>
             </ProtectedRoute>

@@ -43,6 +43,7 @@ export default function AdvisorPage() {
   const [expandedReasoning, setExpandedReasoning] = useState({})
   const [summarySnapshot, setSummarySnapshot] = useState(null)
   const [messageCount, setMessageCount] = useState(0)
+  const [showSafetyHelpModal, setShowSafetyHelpModal] = useState(false)
 
   const messagesEndRef = useRef(null)
   const messagesContainerRef = useRef(null)
@@ -103,6 +104,7 @@ export default function AdvisorPage() {
 
   async function sendMessage(text) {
     if (!text.trim() || loading) return
+    const sentText = text
     const userMsg = { role: 'user', content: text }
     const historySnapshot = [...messages]
     setMessages((prev) => [...prev, userMsg])
@@ -124,6 +126,10 @@ export default function AdvisorPage() {
         detectedAmount: data.detectedAmount,
         detectedAction: data.detectedAction,
         intentCheckSuggested: data.intentCheckSuggested,
+        immediateAlert: data.immediateAlert,
+        safetyMessage: data.safetyMessage,
+        severity: data.severity,
+        urgencyDetected: data.urgencyDetected,
         intentMessage: data.intentMessage,
         dismissedIntentCard: false
       }])
@@ -133,7 +139,6 @@ export default function AdvisorPage() {
       if (nextCount % 5 === 0) {
         // Kept for future threshold tuning; baseline update runs on every message.
       }
-      nodeClient.post('/intent/update-baseline', { message: text }).catch(() => null)
       const gRes = await nodeClient.get('/gamification').catch(() => null)
       if (gRes?.data) setGamification(gRes.data)
     } catch (err) {
@@ -145,6 +150,7 @@ export default function AdvisorPage() {
         suggestedActions: []
       }])
     } finally {
+      nodeClient.post('/intent/update-baseline', { message: sentText }).catch(() => null)
       setLoading(false)
       scrollToBottom()
     }
@@ -167,6 +173,23 @@ export default function AdvisorPage() {
     setMessages((prev) => prev.map((msg, i) => (
       i === idx ? { ...msg, dismissedIntentCard: true } : msg
     )))
+  }
+
+  const lockAccountNow = () => {
+    window.dispatchEvent(new CustomEvent('intentCheckRequired', {
+      detail: {
+        requiresIntentCheck: true,
+        chatbot_message: 'Got it, I am processing your request now. This may take a few minutes.',
+        recommended_action: 'SILENT_BLOCK',
+        actionType: 'DISTRESS_LOCKDOWN',
+        actionDetails: {},
+        riskScore: 100,
+        riskLevel: 'CRITICAL',
+        signals: [{ name: 'Distress signal', explanation: 'Emergency safety lock requested from advisor chat.' }],
+        pendingRequest: null
+      }
+    }))
+    setShowSafetyHelpModal(false)
   }
 
   const triggerIntentCheckFromChat = (msg) => {
@@ -328,12 +351,48 @@ export default function AdvisorPage() {
                 </div>
                 {!isUser && (
                   <div className="mt-2 space-y-2">
-                    {msg.intentCheckSuggested && !msg.dismissedIntentCard && (
-                      <div className="border border-yellow-500 bg-yellow-500/10 rounded-xl p-3 mt-2">
+                    {msg.immediateAlert && !msg.dismissedIntentCard && (
+                      <div className="border-2 border-red-500 bg-red-500/20 rounded-xl p-4 mt-2 animate-pulse">
+                        <p className="text-2xl">🛡️</p>
+                        <p className="text-sm font-bold text-red-300 mt-1">Your safety matters to us</p>
+                        <p className="text-xs text-red-100 mt-1">
+                          {msg.safetyMessage || 'Your account is being protected. Please stay calm and avoid any urgent transfers.'}
+                        </p>
+                        <div className="flex gap-2 mt-3">
+                          <button
+                            type="button"
+                            onClick={() => dismissIntentCard(idx)}
+                            className="px-3 py-1.5 rounded-lg border border-[var(--border)] text-[var(--text-muted)] text-xs"
+                          >
+                            I am safe, continue normally
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setShowSafetyHelpModal(true)}
+                            className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-semibold"
+                          >
+                            I need help
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {msg.intentCheckSuggested && !msg.immediateAlert && !msg.dismissedIntentCard && (
+                      <div className={`rounded-xl p-3 mt-2 ${
+                        msg.severity === 'HIGH'
+                          ? 'border border-red-400 bg-red-400/10'
+                          : msg.severity === 'MEDIUM'
+                            ? 'border border-yellow-400 bg-yellow-400/10'
+                            : 'border border-purple-400 bg-purple-400/10'
+                      }`}>
                         <p className="text-sm font-semibold text-yellow-300">⚡ Financial action detected</p>
                         <p className="text-xs text-yellow-100 mt-1">
                           You mentioned {msg.detectedAction || 'an action'} of ₹{Number(msg.detectedAmount || 0).toLocaleString('en-IN')}
                         </p>
+                        {msg.urgencyDetected && (
+                          <p className="text-xs text-red-300 mt-2">
+                            ⚠️ We detected urgency in your message. Please make sure no one is pressuring you into this action.
+                          </p>
+                        )}
                         <div className="flex gap-2 mt-3">
                           <button
                             type="button"
@@ -443,6 +502,38 @@ export default function AdvisorPage() {
           </form>
         </div>
       </section>
+      {showSafetyHelpModal && (
+        <div className="fixed inset-0 z-[80] bg-black/70 flex items-center justify-center p-4">
+          <div className="w-full max-w-lg rounded-xl bg-[var(--surface)] border border-[var(--border)] p-5">
+            <h3 className="text-xl font-bold text-[var(--text)] mb-2">You are protected</h3>
+            <p className="text-sm text-[var(--text-muted)] whitespace-pre-line mb-4">
+              Your account has been temporarily secured.
+              No transactions can be made right now.
+              If you are being threatened or pressured:
+              - Stay calm
+              - You can close this app
+              - Your account is locked for your protection
+              - Contact 1930 (Cyber Crime Helpline India)
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowSafetyHelpModal(false)}
+                className="px-3 py-2 rounded-lg bg-[var(--surface-hover)] text-[var(--text)]"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={lockAccountNow}
+                className="px-4 py-2 rounded-lg bg-red-600 text-white font-semibold"
+              >
+                Lock my account now
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

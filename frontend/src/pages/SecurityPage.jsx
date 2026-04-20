@@ -33,21 +33,25 @@ export default function SecurityPage() {
   const [events, setEvents] = useState([])
   const [transactions, setTransactions] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [showFreezeConfirm, setShowFreezeConfirm] = useState(false)
 
   const loadData = async () => {
+    setLoading(true)
+    setError('')
     try {
       const [sRes, eRes, tRes] = await Promise.all([
         nodeClient.get('/security/score'),
         nodeClient.get('/security/risk-events'),
         nodeClient.get('/transactions')
       ])
-      setScoreData(sRes.data)
-      setEvents(eRes.data ?? [])
-      setTransactions((tRes.data ?? []).slice(0, 5))
-      setSecurityScore(sRes.data?.score ?? 0)
+      setScoreData(sRes?.data || { score: 0, checks: [], cardFrozen: false })
+      setEvents(Array.isArray(eRes?.data) ? eRes.data : [])
+      setTransactions((Array.isArray(tRes?.data) ? tRes.data : []).slice(0, 5))
+      setSecurityScore(sRes?.data?.score ?? 0)
     } catch (err) {
       console.error(err)
+      setError('Unable to load security data right now. Please try again in a moment.')
     } finally {
       setLoading(false)
     }
@@ -81,9 +85,9 @@ export default function SecurityPage() {
   }
 
   const riskIndexedTx = useMemo(() => {
-    return transactions.map((tx) => {
+    return (transactions || []).map((tx) => {
       const txTime = new Date(tx.createdAt).getTime()
-      const matched = events.find((e) => {
+      const matched = (events || []).find((e) => {
         const eTime = new Date(e.createdAt).getTime()
         const timeDelta = Math.abs(txTime - eTime)
         return timeDelta <= 15 * 60 * 1000 && Math.abs((e.amount || 0) - (tx.amount || 0)) < 1
@@ -93,7 +97,12 @@ export default function SecurityPage() {
   }, [transactions, events])
 
   if (loading) {
-    return <div className="text-[var(--text-muted)]">Loading security center...</div>
+    return (
+      <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-6 flex items-center gap-3 text-[var(--text-muted)]">
+        <span className="w-4 h-4 rounded-full border-2 border-[var(--accent)] border-t-transparent animate-spin" />
+        Loading security center...
+      </div>
+    )
   }
 
   const score = scoreData.score ?? 0
@@ -103,6 +112,11 @@ export default function SecurityPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold text-[var(--text)] mb-6">Security Center</h1>
+      {error && (
+        <div className="mb-4 rounded-lg border border-[var(--warn)]/50 bg-[var(--warn)]/10 p-3 text-sm text-[var(--warn)]">
+          {error}
+        </div>
+      )}
 
       {scoreData.cardFrozen && (
         <div className="mb-4 rounded-lg border border-[var(--danger)]/60 bg-[var(--danger)]/15 p-3 text-[var(--danger)] font-semibold">
@@ -127,7 +141,7 @@ export default function SecurityPage() {
           <section className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-5">
             <h2 className="text-lg font-semibold text-[var(--text)] mb-4">Security Checks</h2>
             <div className="space-y-3">
-              {checks.map((check) => (
+              {(checks || []).map((check) => (
                 <div key={check.id} className="rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3">
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -156,11 +170,11 @@ export default function SecurityPage() {
         <div className="space-y-6">
           <section className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-5">
             <h2 className="text-lg font-semibold text-[var(--text)] mb-4">Fraud Alert Feed</h2>
-            {events.length === 0 ? (
+            {(events || []).length === 0 ? (
               <p className="text-sm text-[var(--text-muted)]">No risk events yet — your account looks clean ✓</p>
             ) : (
               <div className="space-y-3">
-                {events.map((event) => {
+                {(events || []).map((event) => {
                   const color = scoreBadgeColor(event.riskScore)
                   const decisionColor =
                     event.decision === 'BLOCK' ? 'var(--danger)' : event.decision === 'WARN' ? 'var(--warn)' : 'var(--success)'
@@ -199,11 +213,11 @@ export default function SecurityPage() {
 
           <section className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-5">
             <h2 className="text-lg font-semibold text-[var(--text)] mb-4">Recent Transactions</h2>
-            {riskIndexedTx.length === 0 ? (
+            {(riskIndexedTx || []).length === 0 ? (
               <p className="text-sm text-[var(--text-muted)]">No transactions yet.</p>
             ) : (
               <div className="space-y-2 mb-4">
-                {riskIndexedTx.map((tx) => (
+                {(riskIndexedTx || []).map((tx) => (
                   <div key={tx.id} className="rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3">
                     <div className="flex items-start justify-between gap-3">
                       <div>

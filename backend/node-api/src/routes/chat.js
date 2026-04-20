@@ -6,39 +6,6 @@ import { addXP } from '../services/xpService.js'
 
 const router = express.Router()
 
-function parseAmountFromMessage(message) {
-  const text = String(message || '').toLowerCase()
-  const rupeeMatch = text.match(/₹\s*([\d,]+(?:\.\d+)?)/i)
-  if (rupeeMatch) return Number(String(rupeeMatch[1]).replace(/,/g, ''))
-
-  const kMatch = text.match(/\b(\d+(?:\.\d+)?)\s*k\b/i)
-  if (kMatch) return Number(kMatch[1]) * 1000
-
-  const thousandMatch = text.match(/\b(\d+(?:\.\d+)?)\s*thousand\b/i)
-  if (thousandMatch) return Number(thousandMatch[1]) * 1000
-
-  const lakhMatch = text.match(/\b(\d+(?:\.\d+)?)\s*lakh\b/i)
-  if (lakhMatch) return Number(lakhMatch[1]) * 100000
-
-  const rawNumber = text.match(/\b(\d{4,})\b/)
-  if (rawNumber) return Number(rawNumber[1])
-  return null
-}
-
-function detectFinancialAction(message) {
-  const text = String(message || '').toLowerCase()
-  const groups = [
-    { type: 'transfer', keywords: ['transfer', 'send money', 'move funds', 'send to'] },
-    { type: 'purchase', keywords: ['buy', 'purchase', 'spend', 'pay for'] },
-    { type: 'investment', keywords: ['invest', 'put money', 'move to', 'shift to'] }
-  ]
-  for (const group of groups) {
-    const found = group.keywords.find((kw) => text.includes(kw))
-    if (found) return { detectedAction: found, detectedType: group.type }
-  }
-  return { detectedAction: null, detectedType: null }
-}
-
 function computeSecurityScore(profile) {
   if (!profile) return 0
   let score = 0
@@ -113,19 +80,131 @@ router.post('/', authMiddleware, async (req, res) => {
     )
 
     await addXP(userId, 3)
-    const amount = parseAmountFromMessage(message)
-    const actionDetected = detectFinancialAction(message)
-    const financialActionDetected = Boolean(actionDetected.detectedAction && amount && amount > 1000)
 
-    res.json({
+    const userMessage = String(req.body.message || '').toLowerCase()
+    const aiResponse = data.reply
+
+    const transferPatterns = [
+      'transfer', 'send money', 'move funds', 'send to',
+      'wire', 'pay to', 'remit', 'send ₹', 'transfer ₹'
+    ]
+
+    const purchasePatterns = [
+      'buy', 'purchase', 'spend', 'pay for', 'buying',
+      'want to get', 'going to buy', 'should i buy',
+      'can i buy', 'afford', 'splurge'
+    ]
+
+    const investmentPatterns = [
+      'invest', 'put money', 'move to', 'shift to',
+      'put in', 'fd', 'fixed deposit', 'mutual fund',
+      'sip', 'stocks', 'shares', 'crypto', 'gold'
+    ]
+
+    const urgencyPatterns = [
+      'right now', 'immediately', 'urgent', 'asap',
+      'quickly', 'fast', 'hurry', 'now', 'instant',
+      'emergency', 'they are waiting', 'please just',
+      'dont ask', 'just do it', 'need this done',
+      'waiting for me', 'person is waiting', 'he is waiting',
+      'she is waiting', 'they need', 'told me to'
+    ]
+
+    const IMMEDIATE_ALERT_WORDS = [
+      'panic', 'scam', 'scared', 'afraid', 'fear',
+      'threatening', 'threatened', 'blackmail', 'blackmailing',
+      'kidnap', 'ransom', 'police', 'arrested', 'arrest',
+      'forced', 'forcing', 'help me', 'please help',
+      'dont tell', 'keep secret', 'secret transfer',
+      'someone is watching', 'being watched', 'surveillance',
+      'danger', 'dangerous', 'unsafe', 'not safe',
+      'coerced', 'coercion', 'pressure', 'pressured',
+      'gun', 'knife', 'weapon', 'hurt', 'harm',
+      'fraud', 'hacked', 'compromised', 'stolen',
+      'impersonat', 'fake officer', 'fake police',
+      'cyber crime', 'cybercrime', 'rbi called',
+      'bank called', 'income tax', 'tax notice',
+      'court notice', 'legal notice', 'arrest warrant'
+    ]
+
+    const immediateAlert = IMMEDIATE_ALERT_WORDS.some(word => userMessage.includes(word))
+
+    if (immediateAlert || data?.distressDetected) {
+      return res.json({
+        ...data,
+        reply: aiResponse,
+        immediateAlert: true,
+        alertType: 'DISTRESS_SIGNAL',
+        alertMessage: 'We detected something in your message that concerns us.',
+        safetyMessage: 'If you are in danger or being pressured, you can type your panic phrase or close the app. Your account is being protected.',
+        intentCheckSuggested: true,
+        detectedAction: 'distress_signal',
+        detectedAmount: 0,
+        severity: 'CRITICAL'
+      })
+    }
+
+    const amountRegex = /(?:₹|rs\.?|inr)?\s*(\d+(?:,\d+)*(?:\.\d+)?)\s*(k|thousand|lakh|lac|crore|l|cr)?/gi
+    const amounts = []
+    for (const match of userMessage.matchAll(amountRegex)) {
+      const raw = Number(String(match[1] || '').replace(/,/g, ''))
+      if (!Number.isFinite(raw)) continue
+      const suffix = String(match[2] || '').toLowerCase()
+      let multiplier = 1
+      if (suffix === 'k' || suffix === 'thousand') multiplier = 1000
+      else if (suffix === 'lakh' || suffix === 'lac' || suffix === 'l') multiplier = 100000
+      else if (suffix === 'crore' || suffix === 'cr') multiplier = 10000000
+      amounts.push(raw * multiplier)
+    }
+    const detectedAmount = amounts.length > 0 ? Math.max(...amounts) : 0
+
+    const matchedTransfer = transferPatterns.some(p => userMessage.includes(p))
+    const matchedPurchase = purchasePatterns.some(p => userMessage.includes(p))
+    const matchedInvestment = investmentPatterns.some(p => userMessage.includes(p))
+    const matchedUrgency = urgencyPatterns.some(p => userMessage.includes(p))
+
+    const financialActionDetected = matchedTransfer || matchedPurchase || matchedInvestment || matchedUrgency
+
+    if (financialActionDetected && (detectedAmount > 500 || matchedUrgency)) {
+      const detectedAction = matchedTransfer
+        ? 'transfer'
+        : matchedPurchase
+          ? 'purchase'
+          : matchedInvestment
+            ? 'investment'
+            : 'financial action'
+      const intentSeverity = matchedUrgency
+        ? 'HIGH'
+        : detectedAmount > 50000
+          ? 'HIGH'
+          : detectedAmount > 10000
+            ? 'MEDIUM'
+            : 'LOW'
+
+      return res.json({
+        ...data,
+        reply: aiResponse,
+        financialActionDetected: true,
+        detectedAmount,
+        detectedAction,
+        intentCheckSuggested: true,
+        severity: intentSeverity,
+        urgencyDetected: matchedUrgency,
+        intentMessage: matchedUrgency
+          ? 'I noticed some urgency in your message. Before any action, let me make sure you are safe.'
+          : 'I noticed you mentioned a financial action. Would you like me to help you execute this safely?'
+      })
+    }
+
+    return res.json({
       ...data,
-      financialActionDetected,
-      detectedAmount: financialActionDetected ? amount : null,
-      detectedAction: financialActionDetected ? actionDetected.detectedAction : null,
-      intentCheckSuggested: financialActionDetected,
-      intentMessage: financialActionDetected
-        ? 'I noticed you mentioned a financial action. Would you like me to help you execute this safely?'
-        : null
+      financialActionDetected: false,
+      detectedAmount: 0,
+      detectedAction: null,
+      intentCheckSuggested: false,
+      severity: null,
+      urgencyDetected: false,
+      intentMessage: null
     })
   } catch (err) {
     console.error('Chat route error:', err.message)
