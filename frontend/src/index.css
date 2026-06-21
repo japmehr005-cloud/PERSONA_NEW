@@ -1,75 +1,14 @@
 @import "tailwindcss";
 
-/* ─── Theme (exact) ─── */
+/* ─── Theme: dark (default) ─── */
 :root {
-  --card: #fdedc9;
-  --ring: #e670ab;
-  --input: #e4e4e4;
-  --muted: #b2e1eb;
-  --accent: #fbe2a7;
-  --border: #d04f99;
-  --radius: 0.4rem;
-  --chart-1: #e670ab;
-  --chart-2: #84d2e2;
-  --chart-3: #fbe2a7;
-  --chart-4: #f3a0ca;
-  --chart-5: #d7488e;
-  --popover: #ffffff;
-  --primary: #d04f99;
-  --sidebar: #f8d8ea;
-  --font-mono: Fira Code, monospace;
-  --font-sans: Poppins, sans-serif;
-  --secondary: #8acfd1;
-  --background: #f6e6ee;
-  --font-serif: Lora, serif;
-  --foreground: #5b5b5b;
-  --destructive: #f96f70;
-  --shadow-blur: 0px;
-  --shadow-color: hsl(325.78 58.18% 56.86% / 0.5);
-  --sidebar-ring: #ec4899;
-  --shadow-spread: 0px;
-  --shadow-opacity: 1;
-  --sidebar-accent: #f9a8d4;
-  --sidebar-border: #f3e8ff;
-  --card-foreground: #5b5b5b;
-  --shadow-offset-x: 3px;
-  --shadow-offset-y: 3px;
-  --sidebar-primary: #ec4899;
-  --muted-foreground: #7a7a7a;
-  --accent-foreground: #333333;
-  --popover-foreground: #5b5b5b;
-  --primary-foreground: #ffffff;
-  --sidebar-foreground: #333333;
-  --secondary-foreground: #333333;
-  --destructive-foreground: #ffffff;
-  --sidebar-accent-foreground: #333333;
-  --sidebar-primary-foreground: #ffffff;
-
-  /* Elevation token derived from theme shadow */
-  --shadow-elevated: var(--shadow-offset-x) var(--shadow-offset-y) var(--shadow-blur)
-    var(--shadow-spread) var(--shadow-color);
-
-  /* Legacy aliases — keeps existing components working */
-  --bg: var(--background);
-  --surface: var(--card);
-  --surface-hover: var(--muted);
-  --surface-raised: var(--popover);
-  --text: var(--foreground);
-  --text-muted: var(--muted-foreground);
-  --accent-action: var(--primary);
-  --accent-light: var(--ring);
-  --success: var(--secondary);
-  --warn: var(--accent);
-  --danger: var(--destructive);
-}
-
-.dark {
   --card: #1c2e38;
   --ring: #50afb6;
   --input: #20333d;
   --muted: #24272b;
   --accent: #c67b96;
   --border: #324859;
+  --radius: 0.4rem;
   --chart-1: #50afb6;
   --chart-2: #e4a2b1;
   --chart-3: #c67b96;
@@ -85,11 +24,16 @@
   --font-serif: Lora, serif;
   --foreground: #f3e3ea;
   --destructive: #e35ea4;
+  --shadow-blur: 0px;
   --shadow-color: #324859;
   --sidebar-ring: #ec4899;
+  --shadow-spread: 0px;
+  --shadow-opacity: 1;
   --sidebar-accent: #f9a8d4;
   --sidebar-border: #374151;
   --card-foreground: #f3e3ea;
+  --shadow-offset-x: 3px;
+  --shadow-offset-y: 3px;
   --sidebar-primary: #ec4899;
   --muted-foreground: #e4a2b1;
   --accent-foreground: #f3e3ea;
@@ -100,6 +44,56 @@
   --destructive-foreground: #12242e;
   --sidebar-accent-foreground: #1f2937;
   --sidebar-primary-foreground: #ffffff;
+
+  --shadow-elevated: var(--shadow-offset-x) var(--shadow-offset-y) var(--shadow-blur)
+    var(--shadow-spread) var(--shadow-color);
+
+  /* Legacy aliases */
+  --bg: var(--background);
+  --surface: var(--card);
+  --surface-hover: var(--muted);
+  --surface-raised: var(--popover);
+  --text: var(--foreground);
+  --text-muted: var(--muted-foreground);
+  --accent-action: var(--primary);
+  --accent-light: var(--ring);
+  --success: var(--secondary);
+  --warn: var(--accent);
+  --danger: var(--destructive);
+}
+
+/* ─── Theme: light (optional — add class="light" on <html>) ─── */
+.light {
+  --card: #fdedc9;
+  --ring: #e670ab;
+  --input: #e4e4e4;
+  --muted: #b2e1eb;
+  --accent: #fbe2a7;
+  --border: #d04f99;
+  --chart-1: #e670ab;
+  --chart-2: #84d2e2;
+  --chart-3: #fbe2a7;
+  --chart-4: #f3a0ca;
+  --chart-5: #d7488e;
+  --popover: #ffffff;
+  --primary: #d04f99;
+  --sidebar: #f8d8ea;
+  --secondary: #8acfd1;
+  --background: #f6e6ee;
+  --foreground: #5b5b5b;
+  --destructive: #f96f70;
+  --shadow-color: hsl(325.78 58.18% 56.86% / 0.5);
+  --sidebar-border: #f3e8ff;
+  --card-foreground: #5b5b5b;
+  --sidebar-primary: #ec4899;
+  --muted-foreground: #7a7a7a;
+  --accent-foreground: #333333;
+  --popover-foreground: #5b5b5b;
+  --primary-foreground: #ffffff;
+  --sidebar-foreground: #333333;
+  --secondary-foreground: #333333;
+  --destructive-foreground: #ffffff;
+  --sidebar-accent-foreground: #333333;
 
   --shadow-elevated: var(--shadow-offset-x) var(--shadow-offset-y) var(--shadow-blur)
     var(--shadow-spread) var(--shadow-color);
@@ -179,13 +173,11 @@ body {
 
 /* ─── Layering utilities ─── */
 
-/* L0 — page canvas (pink background) */
 .ui-page {
   background: var(--background);
   color: var(--foreground);
 }
 
-/* L1 — primary cards (cream on pink) */
 .ui-card {
   background: var(--card);
   color: var(--card-foreground);
@@ -194,7 +186,6 @@ body {
   box-shadow: var(--shadow-elevated);
 }
 
-/* L1 elevated — modals, login, hero */
 .ui-card-raised {
   background: var(--popover);
   color: var(--popover-foreground);
@@ -203,35 +194,31 @@ body {
   box-shadow: var(--shadow-elevated);
 }
 
-/* L2 — nested panels inside cards */
 .ui-panel {
-  background: var(--popover);
-  color: var(--popover-foreground);
-  border: 1px solid color-mix(in srgb, var(--border) 35%, transparent);
-  border-radius: var(--radius);
-}
-
-/* L2 — soft tinted inset (tags, chips, stat pills) */
-.ui-panel-muted {
   background: var(--muted);
   color: var(--foreground);
-  border: 1px solid color-mix(in srgb, var(--secondary) 40%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
   border-radius: var(--radius);
 }
 
-/* Top navigation strip */
+.ui-panel-muted {
+  background: color-mix(in srgb, var(--secondary) 18%, var(--card));
+  color: var(--foreground);
+  border: 1px solid color-mix(in srgb, var(--secondary) 35%, transparent);
+  border-radius: var(--radius);
+}
+
 .ui-navbar {
   background: var(--sidebar);
   color: var(--sidebar-foreground);
   border-bottom: 1px solid var(--sidebar-border);
-  box-shadow: 0 2px 0 color-mix(in srgb, var(--shadow-color) 25%, transparent);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--shadow-color) 40%, transparent);
 }
 
-/* Form fields */
 .ui-input {
   background: var(--input);
   color: var(--foreground);
-  border: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
   border-radius: var(--radius);
 }
 
@@ -240,50 +227,50 @@ body {
   outline-offset: 1px;
 }
 
-/* Primary action button */
 .ui-btn-primary {
   background: var(--primary);
   color: var(--primary-foreground);
-  border: 1px solid color-mix(in srgb, var(--primary) 80%, #000);
+  border: 1px solid color-mix(in srgb, var(--primary) 70%, var(--border));
   border-radius: var(--radius);
   font-weight: 600;
 }
 
 .ui-btn-primary:hover:not(:disabled) {
-  filter: brightness(1.05);
+  filter: brightness(1.08);
 }
 
 .ui-btn-primary:disabled {
   opacity: 0.55;
 }
 
-/* Secondary / ghost */
 .ui-btn-ghost {
-  background: var(--popover);
+  background: var(--muted);
   color: var(--foreground);
-  border: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
   border-radius: var(--radius);
 }
 
 .ui-btn-ghost:hover:not(:disabled) {
-  background: var(--muted);
+  background: color-mix(in srgb, var(--muted) 80%, var(--card));
 }
 
-/* Modal overlay */
 .ui-overlay {
-  background: color-mix(in srgb, var(--foreground) 35%, transparent);
+  background: color-mix(in srgb, var(--background) 55%, #000);
 }
 
-/* Nested list rows / panels inside cards → white popover layer */
 .ui-card .rounded-lg.border.border-\[var\(--border\)\].bg-\[var\(--bg\)\],
 .ui-card-raised .rounded-lg.border.border-\[var\(--border\)\].bg-\[var\(--bg\)\] {
-  background: var(--popover);
-  color: var(--popover-foreground);
+  background: var(--muted);
+  color: var(--foreground);
 }
 
-/* Form fields using legacy bg token */
 input.bg-\[var\(--bg\)\],
 select.bg-\[var\(--bg\)\],
 textarea.bg-\[var\(--bg\)\] {
   background: var(--input);
+}
+
+/* Primary buttons — use theme foreground (dark text on yellow in dark mode) */
+.bg-\[var\(--primary\)\] {
+  color: var(--primary-foreground);
 }
