@@ -39,7 +39,7 @@ export default function ExpenseCutSim({ profile, primaryGoal, onSimulationSucces
   }
 
   return (
-    <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4">
+    <div className="ui-card rounded-xl p-4">
       <h3 className="font-semibold text-[var(--text)] mb-3">Expense cut simulator</h3>
       <p className="text-sm text-[var(--text-muted)] mb-4">
         See how cutting a monthly expense speeds up your goal.
@@ -57,7 +57,7 @@ export default function ExpenseCutSim({ profile, primaryGoal, onSimulationSucces
         <button
           type="submit"
           disabled={loading}
-          className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white font-medium disabled:opacity-50"
+          className="px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-medium disabled:opacity-50"
         >
           {loading ? '...' : 'Simulate'}
         </button>

@@ -98,8 +98,8 @@ export default function SecurityPage() {
 
   if (loading) {
     return (
-      <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-6 flex items-center gap-3 text-[var(--text-muted)]">
-        <span className="w-4 h-4 rounded-full border-2 border-[var(--accent)] border-t-transparent animate-spin" />
+      <div className="ui-card rounded-xl p-6 flex items-center gap-3 text-[var(--text-muted)]">
+        <span className="w-4 h-4 rounded-full border-2 border-[var(--ring)] border-t-transparent animate-spin" />
         Loading security center...
       </div>
     )
@@ -126,7 +126,7 @@ export default function SecurityPage() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="space-y-6">
-          <section className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-5">
+          <section className="ui-card rounded-xl p-5">
             <h2 className="text-lg font-semibold text-[var(--text)] mb-4">Security Score</h2>
             <div className="flex items-center gap-5">
               <SecurityScoreRing score={score} />
@@ -138,7 +138,7 @@ export default function SecurityPage() {
             </div>
           </section>
 
-          <section className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-5">
+          <section className="ui-card rounded-xl p-5">
             <h2 className="text-lg font-semibold text-[var(--text)] mb-4">Security Checks</h2>
             <div className="space-y-3">
               {(checks || []).map((check) => (
@@ -168,7 +168,7 @@ export default function SecurityPage() {
         </div>
 
         <div className="space-y-6">
-          <section className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-5">
+          <section className="ui-card rounded-xl p-5">
             <h2 className="text-lg font-semibold text-[var(--text)] mb-4">Fraud Alert Feed</h2>
             {(events || []).length === 0 ? (
               <p className="text-sm text-[var(--text-muted)]">No risk events yet — your account looks clean ✓</p>
@@ -216,7 +216,7 @@ export default function SecurityPage() {
             )}
           </section>
 
-          <section className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-5">
+          <section className="ui-card rounded-xl p-5">
             <h2 className="text-lg font-semibold text-[var(--text)] mb-4">Recent Transactions</h2>
             {(riskIndexedTx || []).length === 0 ? (
               <p className="text-sm text-[var(--text-muted)]">No transactions yet.</p>
@@ -256,8 +256,8 @@ export default function SecurityPage() {
       </div>
 
       {showFreezeConfirm && (
-        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-xl bg-[var(--surface)] border border-[var(--border)] p-5">
+        <div className="fixed inset-0 z-50 ui-overlay flex items-center justify-center p-4">
+          <div className="w-full max-w-sm ui-card-raised p-5">
             <h3 className="text-lg font-semibold text-[var(--text)] mb-2">Freeze Card?</h3>
             <p className="text-sm text-[var(--text-muted)] mb-4">
               This will lock debit card transactions until you manually unfreeze it.

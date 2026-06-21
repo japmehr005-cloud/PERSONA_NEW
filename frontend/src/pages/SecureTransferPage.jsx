@@ -246,14 +246,14 @@ export default function SecureTransferPage() {
         <b> time-limited</b> session — and only <b>once</b>.
       </p>
       <p className="text-xs text-[var(--text-muted)] mb-6">
-        This device id: <span className="font-mono text-[var(--accent)]">{deviceId}</span>
+        This device id: <span className="font-mono text-[var(--primary)]">{deviceId}</span>
       </p>
 
       <div className="grid lg:grid-cols-[1.3fr_1fr] gap-6">
         {/* LEFT — flow */}
         <div className="space-y-6">
           {/* Transfer form */}
-          <section className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-5">
+          <section className="ui-card rounded-xl p-5">
             <h2 className="text-lg font-semibold text-[var(--text)] mb-4">1 · Initiate transfer</h2>
             <div className="grid sm:grid-cols-2 gap-3 mb-3">
               <div>
@@ -285,7 +285,7 @@ export default function SecureTransferPage() {
                     onClick={() => setForceRisk(r)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${
                       forceRisk === r
-                        ? 'bg-[var(--accent)] text-white border-[var(--accent)]'
+                        ? 'bg-[var(--primary)] text-white border-[var(--primary)]'
                         : 'bg-[var(--bg)] text-[var(--text-muted)] border-[var(--border)]'
                     }`}
                   >
@@ -301,7 +301,7 @@ export default function SecureTransferPage() {
               type="button"
               onClick={startTransfer}
               disabled={loading}
-              className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white font-semibold disabled:opacity-50"
+              className="px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-semibold disabled:opacity-50"
             >
               {loading && step === STEP.IDLE ? 'Checking…' : 'Send money'}
             </button>
@@ -370,7 +370,7 @@ export default function SecureTransferPage() {
                       <span
                         className={`w-6 h-6 rounded-full flex items-center justify-center font-bold ${
                           active
-                            ? 'bg-[var(--accent)] text-white'
+                            ? 'bg-[var(--primary)] text-white'
                             : done
                             ? 'bg-[var(--success)] text-black'
                             : 'bg-[var(--bg)] text-[var(--text-muted)]'
@@ -394,7 +394,7 @@ export default function SecureTransferPage() {
                     type="button"
                     onClick={approveDevice}
                     disabled={loading}
-                    className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white font-semibold disabled:opacity-50"
+                    className="px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-semibold disabled:opacity-50"
                   >
                     📱 Approve on this device
                   </button>
@@ -406,7 +406,7 @@ export default function SecureTransferPage() {
                   <p className="text-sm text-[var(--text-muted)] mb-2">
                     Step 2 — Enter the OTP linked to this session.
                   </p>
-                  <div className="mb-3 rounded-lg border border-[var(--accent)]/40 bg-[var(--accent)]/10 p-2 text-sm text-[var(--text)]">
+                  <div className="mb-3 rounded-lg border border-[var(--primary)]/40 bg-[var(--primary)]/10 p-2 text-sm text-[var(--text)]">
                     Demo OTP (bound to this session): <span className="font-mono font-bold">{issuedOtp}</span>
                   </div>
                   <div className="flex gap-2 mb-3">
@@ -492,7 +492,7 @@ export default function SecureTransferPage() {
           )}
 
           {/* Attack simulations */}
-          <section className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-5">
+          <section className="ui-card rounded-xl p-5">
             <h2 className="text-lg font-semibold text-[var(--text)] mb-1">🧪 Attack simulations</h2>
             <p className="text-xs text-[var(--text-muted)] mb-4">
               Each spins up a valid HIGH-risk session with a real OTP, then attacks it. Watch the event log.
@@ -528,7 +528,7 @@ export default function SecureTransferPage() {
 
         {/* RIGHT — event log */}
         <div>
-          <section className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-5 sticky top-20">
+          <section className="ui-card rounded-xl p-5 sticky top-20">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-lg font-semibold text-[var(--text)]">Event log</h2>
               <button

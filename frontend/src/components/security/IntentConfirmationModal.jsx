@@ -126,8 +126,8 @@ export default function IntentConfirmationModal({ data, onConfirm, onCancel }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[70] bg-black/70 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-xl overflow-hidden">
+    <div className="fixed inset-0 z-[70] ui-overlay flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl ui-card-raised overflow-hidden">
         <div className="p-4 border-b border-[var(--border)]">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -147,7 +147,7 @@ export default function IntentConfirmationModal({ data, onConfirm, onCancel }) {
                 <div
                   className={`px-3 py-2 rounded-xl text-sm ${
                     msg.role === 'user'
-                      ? 'bg-[var(--accent)] text-white rounded-br-sm'
+                      ? 'bg-[var(--primary)] text-white rounded-br-sm'
                       : 'bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--text)] rounded-bl-sm'
                   }`}
                 >
@@ -170,7 +170,7 @@ export default function IntentConfirmationModal({ data, onConfirm, onCancel }) {
               type="button"
               onClick={sendIntentMessage}
               disabled={sending || analysis?.recommended_action === 'SILENT_BLOCK'}
-              className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-semibold disabled:opacity-50"
+              className="px-4 py-2 rounded-lg bg-[var(--primary)] text-white text-sm font-semibold disabled:opacity-50"
             >
               Send
             </button>
@@ -211,7 +211,7 @@ export default function IntentConfirmationModal({ data, onConfirm, onCancel }) {
             <div className="flex flex-wrap items-center justify-end gap-2">
               <button type="button" onClick={onCancel} className="px-3 py-2 rounded-lg bg-[var(--surface-hover)] text-[var(--text)] text-sm">Cancel, I will think about it</button>
               <button type="button" onClick={handleSchedule} className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm">Schedule for 4 hours later</button>
-              <button type="button" onClick={handleProceed} className="px-3 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-semibold">I understand, proceed anyway</button>
+              <button type="button" onClick={handleProceed} className="px-3 py-2 rounded-lg bg-[var(--primary)] text-white text-sm font-semibold">I understand, proceed anyway</button>
             </div>
           )}
 
@@ -229,7 +229,7 @@ export default function IntentConfirmationModal({ data, onConfirm, onCancel }) {
 
           {analysis?.recommended_action === 'SILENT_BLOCK' && (
             <div className="flex items-center gap-3 text-sm text-[var(--text-muted)]">
-              <span className="w-4 h-4 rounded-full border-2 border-[var(--accent)] border-t-transparent animate-spin" />
+              <span className="w-4 h-4 rounded-full border-2 border-[var(--primary)] border-t-transparent animate-spin" />
               Processing your request, this may take a few minutes...
             </div>
           )}

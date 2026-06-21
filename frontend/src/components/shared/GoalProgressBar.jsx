@@ -10,7 +10,7 @@ export default function GoalProgressBar({ name, savedAmount, targetAmount, pctCo
       </div>
       <div className="h-2 rounded-full bg-[var(--surface-hover)] overflow-hidden">
         <div
-          className="h-full rounded-full bg-[var(--accent)] transition-all duration-500"
+          className="h-full rounded-full bg-[var(--primary)] transition-all duration-500"
           style={{ width: `${pct}%` }}
         />
       </div>

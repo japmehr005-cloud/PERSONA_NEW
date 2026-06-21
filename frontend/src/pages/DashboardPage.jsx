@@ -54,7 +54,7 @@ export default function DashboardPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[var(--text)]">Dashboard</h1>
         {gamification?.streakDays > 1 && (
-          <p className="text-sm text-[var(--accent)] mt-1">Welcome back! 🔥 Day {gamification.streakDays} streak</p>
+          <p className="text-sm text-[var(--primary)] mt-1">Welcome back! 🔥 Day {gamification.streakDays} streak</p>
         )}
       </div>
       <BalanceHero

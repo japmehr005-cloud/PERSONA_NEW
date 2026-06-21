@@ -114,7 +114,7 @@ export default function SimulatePage() {
         Run splurge, investment and expense-cut simulations. Every run counts toward achievements.
       </p>
       {gamification != null && (
-        <p className="text-sm text-[var(--accent)] mb-6">
+        <p className="text-sm text-[var(--primary)] mb-6">
           You&apos;ve run {gamification.simCount} simulations
           {gamification.simCount < 10 ? ` — ${10 - gamification.simCount} more to unlock Data Nerd badge 🧠` : ''}
         </p>
@@ -123,12 +123,12 @@ export default function SimulatePage() {
       <InvestmentSim prefillReturn={prefillReturn} onSimulationSuccess={handleSimulationSuccess} />
       <ExpenseCutSim profile={profile} primaryGoal={primaryGoal} onSimulationSuccess={handleSimulationSuccess} />
 
-      <section className="mt-8 rounded-xl bg-[var(--surface)] border border-[var(--border)] p-5">
+      <section className="mt-8 ui-card rounded-xl p-5">
         <h2 className="text-xl font-semibold text-[var(--text)] mb-4">📊 Investment Explorer</h2>
 
         <div className="grid lg:grid-cols-3 gap-4 mb-6">
           {INVESTMENT_TIERS.map((tier) => (
-            <div key={tier.title} className="rounded-xl border border-[var(--border)] bg-[var(--bg)] p-4">
+            <div key={tier.title} className="ui-panel rounded-xl p-4">
               <h3 className="font-bold mb-3" style={{ color: tier.accent }}>{tier.title}</h3>
               <div className="space-y-3">
                 {tier.items.map((item) => (
@@ -140,7 +140,7 @@ export default function SimulatePage() {
                     <button
                       type="button"
                       onClick={() => setPrefillReturn(String(item.avgReturn))}
-                      className="mt-2 text-xs font-semibold text-[var(--accent)] hover:underline"
+                      className="mt-2 text-xs font-semibold text-[var(--primary)] hover:underline"
                     >
                       Simulate This →
                     </button>
@@ -151,7 +151,7 @@ export default function SimulatePage() {
           ))}
         </div>
 
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg)] p-4 mb-4">
+        <div className="ui-panel rounded-xl p-4 mb-4">
           <h3 className="font-semibold text-[var(--text)] mb-2">Precious Metals Tracker</h3>
           <p className="text-sm text-[var(--text-muted)] mb-2">Gold 24K: ₹9,200/gram · Silver: ₹110/gram</p>
           <p className="text-xs text-[var(--text-muted)] mb-3">Indicative price, not live data.</p>
@@ -176,7 +176,7 @@ export default function SimulatePage() {
           <button
             type="button"
             onClick={() => setShowGoldGoalModal(true)}
-            className="px-3 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-semibold"
+            className="px-3 py-2 rounded-lg bg-[var(--primary)] text-white text-sm font-semibold"
           >
             Add Gold to Goals
           </button>
@@ -189,8 +189,8 @@ export default function SimulatePage() {
       </section>
 
       {showGoldGoalModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-xl bg-[var(--surface)] border border-[var(--border)] p-5">
+        <div className="fixed inset-0 z-50 ui-overlay flex items-center justify-center p-4">
+          <div className="w-full max-w-sm ui-card-raised p-5">
             <h3 className="text-lg font-semibold text-[var(--text)] mb-2">Create Gold Goal</h3>
             <input
               type="number"
@@ -205,7 +205,7 @@ export default function SimulatePage() {
               <button type="button" onClick={() => setShowGoldGoalModal(false)} className="px-3 py-2 rounded bg-[var(--surface-hover)] text-[var(--text)]">
                 Cancel
               </button>
-              <button type="button" onClick={createGoldGoal} className="px-3 py-2 rounded bg-[var(--accent)] text-white">
+              <button type="button" onClick={createGoldGoal} className="px-3 py-2 rounded bg-[var(--primary)] text-white">
                 Add Goal
               </button>
             </div>

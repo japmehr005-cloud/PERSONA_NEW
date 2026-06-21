@@ -7,7 +7,7 @@ export default function AppLayout({ children }) {
   const { intentCheckActive, intentData, confirmAndRetry, cancelIntent } = useIntentCheck()
 
   return (
-    <div className="min-h-screen bg-[var(--bg)]">
+    <div className="min-h-screen ui-page">
       <Navbar />
       <main className="max-w-6xl mx-auto px-4 py-6">
         {children || <Outlet />}

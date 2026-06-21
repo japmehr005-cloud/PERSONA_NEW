@@ -200,7 +200,7 @@ export default function AccountSetupPage() {
         </div>
       )}
 
-      <div className="mb-6 rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4">
+      <div className="mb-6 ui-card rounded-xl p-4">
         <h2 className="font-semibold text-[var(--text)] mb-1">🛡 Conversational Safety</h2>
         <p className="text-sm text-[var(--text-muted)] mb-4">Set up personal phrases to protect yourself</p>
 
@@ -217,7 +217,7 @@ export default function AccountSetupPage() {
             <p className="text-xs text-[var(--text-muted)] mt-1">
               Type this in any chat to signal you are acting freely and confirm actions
             </p>
-            {maskedSafePhrase && <p className="text-xs text-[var(--accent)] mt-1">Current: {maskedSafePhrase}</p>}
+            {maskedSafePhrase && <p className="text-xs text-[var(--primary)] mt-1">Current: {maskedSafePhrase}</p>}
           </div>
 
           <div>
@@ -232,7 +232,7 @@ export default function AccountSetupPage() {
             <p className="text-xs text-[var(--text-muted)] mt-1">
               If you ever type this phrase in chat, we silently secure your account without alerting anyone around you
             </p>
-            {maskedPanicPhrase && <p className="text-xs text-[var(--accent)] mt-1">Current: {maskedPanicPhrase}</p>}
+            {maskedPanicPhrase && <p className="text-xs text-[var(--primary)] mt-1">Current: {maskedPanicPhrase}</p>}
           </div>
         </div>
 
@@ -241,7 +241,7 @@ export default function AccountSetupPage() {
             type="button"
             onClick={handleSavePhrases}
             disabled={savingPhrases}
-            className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-semibold disabled:opacity-50"
+            className="px-4 py-2 rounded-lg bg-[var(--primary)] text-white text-sm font-semibold disabled:opacity-50"
           >
             {savingPhrases ? 'Saving...' : 'Save Phrases'}
           </button>
@@ -329,7 +329,7 @@ export default function AccountSetupPage() {
               onChange={(e) => setNewGoal((g) => ({ ...g, targetDate: e.target.value }))}
               className="w-full px-3 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-[var(--text)]"
             />
-            <button type="submit" disabled={addingGoal} className="w-full py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-medium disabled:opacity-50">
+            <button type="submit" disabled={addingGoal} className="w-full py-2 rounded-lg bg-[var(--primary)] text-white text-sm font-medium disabled:opacity-50">
               {addingGoal ? '...' : 'Add goal'}
             </button>
           </form>
@@ -385,7 +385,7 @@ export default function AccountSetupPage() {
                         <button
                           type="button"
                           onClick={() => handleGoalProgressUpdate(g)}
-                          className="px-2 py-1 rounded text-xs bg-[var(--accent)] text-white"
+                          className="px-2 py-1 rounded text-xs bg-[var(--primary)] text-white"
                         >
                           Confirm
                         </button>
@@ -395,7 +395,7 @@ export default function AccountSetupPage() {
                     <button
                       type="button"
                       onClick={() => setEditingGoalId(g.id)}
-                      className="text-xs text-[var(--accent)] hover:underline"
+                      className="text-xs text-[var(--primary)] hover:underline"
                     >
                       Update Progress
                     </button>
@@ -405,11 +405,11 @@ export default function AccountSetupPage() {
             </div>
           )}
         </div>
-        <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4">
+        <div className="ui-card rounded-xl p-4">
           <h2 className="font-semibold text-[var(--text)] mb-2">Live summary</h2>
           <p className="text-sm text-[var(--text-muted)]">Income: ₹{totalIncome.toLocaleString('en-IN')}</p>
           <p className="text-sm text-[var(--text-muted)]">Expenses: ₹{totalExpenses.toLocaleString('en-IN')}</p>
-          <p className="text-sm text-[var(--accent)]">Monthly savings: ₹{monthlySavings.toLocaleString('en-IN')}</p>
+          <p className="text-sm text-[var(--primary)]">Monthly savings: ₹{monthlySavings.toLocaleString('en-IN')}</p>
           <p className="text-sm text-[var(--text)]">Savings rate: {savingsRate.toFixed(1)}%</p>
         </div>
       </div>
@@ -417,7 +417,7 @@ export default function AccountSetupPage() {
       <button
         onClick={handleSave}
         disabled={saving}
-        className="mt-6 px-6 py-2.5 rounded-lg bg-[var(--accent)] text-white font-medium disabled:opacity-50"
+        className="mt-6 px-6 py-2.5 rounded-lg bg-[var(--primary)] text-white font-medium disabled:opacity-50"
       >
         {saving ? 'Saving...' : 'Save profile'}
       </button>

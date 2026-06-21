@@ -270,15 +270,15 @@ export default function AdvisorPage() {
   const streakDays = Number(financialContext.streakDays || 0)
 
   return (
-    <div className="h-[calc(100vh-64px)] bg-[var(--bg)] text-[var(--text)] flex overflow-hidden">
-      <aside className="w-[300px] shrink-0 border-r border-[var(--border)] bg-[var(--surface)] p-4 overflow-y-auto">
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg)] p-4 mb-4">
+    <div className="h-[calc(100vh-64px)] ui-page flex overflow-hidden">
+      <aside className="w-[300px] shrink-0 border-r border-[var(--sidebar-border)] bg-[var(--sidebar)] p-4 overflow-y-auto">
+        <div className="ui-panel p-4 mb-4">
           <h2 className="font-semibold text-[var(--text)] mb-2">Advisor</h2>
           <p className="text-sm text-[var(--text)]">{ADVISOR_META.emoji} {ADVISOR_META.name}</p>
           <p className="text-xs text-[var(--text-muted)] mt-1">{ADVISOR_META.subtitle}</p>
         </div>
 
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--bg)] p-4">
+        <div className="ui-panel p-4">
           <h2 className="font-semibold text-[var(--text)] mb-3">💡 Quick Insights</h2>
           <div className="space-y-2 text-xs text-[var(--text-muted)]">
             <p>
@@ -313,9 +313,9 @@ export default function AdvisorPage() {
       </aside>
 
       <section className="flex-1 min-w-0 flex flex-col">
-        <header className="h-16 border-b border-[var(--border)] px-4 flex items-center justify-between bg-[var(--surface)]">
+        <header className="h-16 border-b border-[var(--sidebar-border)] px-4 flex items-center justify-between bg-[var(--popover)]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[var(--accent)] flex items-center justify-center text-white text-lg">
+            <div className="w-10 h-10 rounded-full bg-[var(--primary)] flex items-center justify-center text-white text-lg">
               {ADVISOR_META.emoji}
             </div>
             <div>
@@ -343,8 +343,8 @@ export default function AdvisorPage() {
                 <div
                   className={`px-4 py-3 text-sm ${
                     isUser
-                      ? 'bg-[var(--accent)] text-white rounded-2xl rounded-br-sm'
-                      : 'bg-[var(--surface)] border border-[var(--border)] text-[var(--text)] rounded-2xl rounded-bl-sm'
+                      ? 'bg-[var(--primary)] text-white rounded-2xl rounded-br-sm'
+                      : 'bg-[var(--popover)] border border-[var(--border)] text-[var(--foreground)] rounded-2xl rounded-bl-sm'
                   }`}
                 >
                   {msg.content}
@@ -397,7 +397,7 @@ export default function AdvisorPage() {
                           <button
                             type="button"
                             onClick={() => triggerIntentCheckFromChat(msg)}
-                            className="px-3 py-1.5 rounded-lg bg-[var(--accent)] text-white text-xs font-semibold"
+                            className="px-3 py-1.5 rounded-lg bg-[var(--primary)] text-white text-xs font-semibold"
                           >
                             Execute this safely
                           </button>
@@ -415,7 +415,7 @@ export default function AdvisorPage() {
                       <div className="text-xs">
                         <button
                           type="button"
-                          className="text-[var(--accent)] hover:underline"
+                          className="text-[var(--primary)] hover:underline"
                           onClick={() => setExpandedReasoning((prev) => ({ ...prev, [idx]: !prev[idx] }))}
                         >
                           💡 Why this advice?
@@ -446,7 +446,7 @@ export default function AdvisorPage() {
           })}
 
           {loading && (
-            <div className="self-start px-4 py-3 rounded-2xl rounded-bl-sm bg-[var(--surface)] border border-[var(--border)]">
+            <div className="self-start px-4 py-3 rounded-2xl rounded-bl-sm ui-panel">
               <div className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-[var(--text-muted)] animate-bounce" />
                 <span className="w-2 h-2 rounded-full bg-[var(--text-muted)] animate-bounce [animation-delay:120ms]" />
@@ -457,7 +457,7 @@ export default function AdvisorPage() {
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="border-t border-[var(--border)] px-4 py-3 bg-[var(--surface)]">
+        <div className="border-t border-[var(--sidebar-border)] px-4 py-3 bg-[var(--popover)]">
           <div className="flex items-center gap-2 overflow-x-auto pb-2">
             {QUICK_CHIPS.map((chip) => (
               <button
@@ -495,7 +495,7 @@ export default function AdvisorPage() {
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white font-semibold disabled:opacity-50"
+              className="px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-semibold disabled:opacity-50"
             >
               →
             </button>
@@ -503,8 +503,8 @@ export default function AdvisorPage() {
         </div>
       </section>
       {showSafetyHelpModal && (
-        <div className="fixed inset-0 z-[80] bg-black/70 flex items-center justify-center p-4">
-          <div className="w-full max-w-lg rounded-xl bg-[var(--surface)] border border-[var(--border)] p-5">
+        <div className="fixed inset-0 z-[80] ui-overlay flex items-center justify-center p-4">
+          <div className="w-full max-w-lg ui-card-raised p-5">
             <h3 className="text-xl font-bold text-[var(--text)] mb-2">You are protected</h3>
             <p className="text-sm text-[var(--text-muted)] whitespace-pre-line mb-4">
               Your account has been temporarily secured.

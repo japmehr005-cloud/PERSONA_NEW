@@ -31,8 +31,8 @@ export default function RiskInterceptModal({ riskData, onConfirm, onCancel }) {
   })
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-      <div className="w-full max-w-xl rounded-2xl bg-[var(--surface)] border border-[var(--border)] p-6 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 ui-overlay">
+      <div className="w-full max-w-xl ui-card-raised p-6">
         <h3 className="text-lg font-bold text-[var(--text)] mb-2">Risk Check</h3>
         {isBlocked && (
           <div className="mb-4 p-3 rounded-lg border border-[var(--danger)]/60 bg-[var(--danger)]/15 text-[var(--danger)] font-semibold">
@@ -99,7 +99,7 @@ export default function RiskInterceptModal({ riskData, onConfirm, onCancel }) {
               </button>
               <button
                 onClick={onConfirm}
-                className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white font-medium"
+                className="px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-medium"
               >
                 I confirm this is me →
               </button>

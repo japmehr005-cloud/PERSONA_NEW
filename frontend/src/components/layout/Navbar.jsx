@@ -16,9 +16,9 @@ export default function Navbar() {
   ]
 
   return (
-    <nav className="sticky top-0 z-50 bg-[var(--surface)] border-b border-[var(--border)]">
+    <nav className="ui-navbar sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-14">
-        <Link to="/dashboard" className="font-bold text-lg text-[var(--accent)]">
+        <Link to="/dashboard" className="font-bold text-lg text-[var(--primary)] tracking-tight">
           PERSONA
         </Link>
         <div className="flex items-center gap-6">
@@ -28,8 +28,8 @@ export default function Navbar() {
               to={path}
               className={`text-sm font-medium transition ${
                 location.pathname === path
-                  ? 'text-[var(--accent)]'
-                  : 'text-[var(--text-muted)] hover:text-[var(--text)]'
+                  ? 'text-[var(--primary)] border-b-2 border-[var(--primary)] pb-0.5'
+                  : 'text-[var(--muted-foreground)] hover:text-[var(--foreground)]'
               }`}
             >
               {label}
@@ -37,7 +37,7 @@ export default function Navbar() {
           ))}
           <button
             onClick={() => logout()}
-            className="text-sm text-[var(--text-muted)] hover:text-[var(--danger)]"
+            className="text-sm text-[var(--muted-foreground)] hover:text-[var(--destructive)]"
           >
             Logout
           </button>

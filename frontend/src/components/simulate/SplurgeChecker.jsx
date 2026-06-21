@@ -153,7 +153,7 @@ export default function SplurgeChecker({ profile, primaryGoal, onSimulationSucce
   }
 
   return (
-    <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4 mb-6">
+    <div className="ui-card rounded-xl p-4 mb-6">
       <h3 className="font-semibold text-[var(--text)] mb-3">Splurge checker</h3>
       <div className={`mb-3 rounded-lg border px-3 py-2 text-xs flex items-center gap-2 ${
         conversationalStatus == null
@@ -207,7 +207,7 @@ export default function SplurgeChecker({ profile, primaryGoal, onSimulationSucce
         <button
           type="submit"
           disabled={loading}
-          className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white font-medium disabled:opacity-50"
+          className="px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-medium disabled:opacity-50"
         >
           {loading ? '...' : 'Check'}
         </button>

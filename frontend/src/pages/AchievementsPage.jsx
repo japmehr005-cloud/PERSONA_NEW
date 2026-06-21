@@ -37,14 +37,14 @@ export default function AchievementsPage() {
         Level {g.level}: {levelName}
       </p>
 
-      <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4 mb-6">
+      <div className="ui-card rounded-xl p-4 mb-6">
         <div className="flex justify-between text-sm mb-2">
           <span className="text-[var(--text)]">{g.xp} XP</span>
           <span className="text-[var(--text-muted)]">Next level: {nextLevelXP} XP</span>
         </div>
         <div className="h-3 rounded-full bg-[var(--surface-hover)] overflow-hidden">
           <div
-            className="h-full rounded-full bg-[var(--accent)] transition-all duration-500"
+            className="h-full rounded-full bg-[var(--primary)] transition-all duration-500"
             style={{ width: `${Math.min(100, progressToNextLevel)}%` }}
           />
         </div>
@@ -56,7 +56,7 @@ export default function AchievementsPage() {
             key={a.id}
             className={`rounded-xl border p-4 ${
               a.isUnlocked
-                ? 'bg-[var(--accent)]/10 border-[var(--accent)]/30'
+                ? 'bg-[var(--primary)]/10 border-[var(--primary)]/30'
                 : 'bg-[var(--surface)] border-[var(--border)] opacity-60'
             }`}
           >

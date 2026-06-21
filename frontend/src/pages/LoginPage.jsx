@@ -69,9 +69,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--bg)] px-4">
-      <div className="w-full max-w-md rounded-2xl bg-[var(--surface)] border border-[var(--border)] p-8">
-        <h1 className="text-2xl font-bold text-[var(--accent)] mb-2">PERSONA</h1>
+    <div className="min-h-screen flex items-center justify-center ui-page px-4">
+      <div className="w-full max-w-md ui-card-raised p-8">
+        <h1 className="text-2xl font-bold text-[var(--primary)] mb-2">PERSONA</h1>
         <p className="text-sm text-[var(--text-muted)] mb-2">SecureWealth Twin — Your wealth, protected.</p>
         <p className="text-xs text-[var(--text-muted)] mb-6">
           No account yet? Click &quot;Don&apos;t have an account? Register&quot; below, then log in with the same email and password.
@@ -84,7 +84,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--text)]"
+              className="w-full px-3 py-2 ui-input text-[var(--foreground)]"
               required
               autoComplete="email"
             />
@@ -96,7 +96,7 @@ export default function LoginPage() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--text)]"
+                className="w-full px-3 py-2 ui-input text-[var(--foreground)]"
                 required
                 autoComplete="name"
               />
@@ -108,7 +108,7 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-[var(--bg)] border border-[var(--border)] text-[var(--text)]"
+              className="w-full px-3 py-2 ui-input text-[var(--foreground)]"
               required
               autoComplete={isLogin ? 'current-password' : 'new-password'}
             />
@@ -116,7 +116,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-lg bg-[var(--accent)] text-white font-medium disabled:opacity-50"
+            className="w-full py-2.5 ui-btn-primary font-medium disabled:opacity-50"
           >
             {loading ? '...' : isLogin ? 'Log in' : 'Register'}
           </button>
@@ -130,7 +130,7 @@ export default function LoginPage() {
         <button
           type="button"
           onClick={() => { setIsLogin(!isLogin); setError(''); }}
-          className="mt-4 w-full text-sm text-[var(--text-muted)] hover:text-[var(--accent)]"
+          className="mt-4 w-full text-sm text-[var(--text-muted)] hover:text-[var(--primary)]"
         >
           {isLogin ? "Don't have an account? Register" : 'Already have an account? Log in'}
         </button>

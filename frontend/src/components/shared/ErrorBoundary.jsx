@@ -29,7 +29,7 @@ export default class ErrorBoundary extends React.Component {
             <button
               type="button"
               onClick={() => { window.location.href = '/dashboard' }}
-              className="px-4 py-2 rounded-lg bg-[var(--accent)] text-white font-semibold"
+              className="px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-semibold"
             >
               Go to Dashboard
             </button>

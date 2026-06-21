@@ -48,7 +48,7 @@ export default function InvestmentSim({ prefillReturn, onSimulationSuccess }) {
   const chartData = result?.chartData?.map((d) => ({ ...d, name: `Year ${d.year}` })) ?? []
 
   return (
-    <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4 mb-6">
+    <div className="ui-card rounded-xl p-4 mb-6">
       <h3 className="font-semibold text-[var(--text)] mb-3">SIP Calculator</h3>
       <p className="text-sm text-[var(--text-muted)] mb-4">
         Project growth with monthly SIP using preset risk profiles or custom return assumptions.
@@ -109,7 +109,7 @@ export default function InvestmentSim({ prefillReturn, onSimulationSuccess }) {
         <button
           type="submit"
           disabled={loading}
-          className="md:col-span-4 px-4 py-2 rounded-lg bg-[var(--accent)] text-white font-medium disabled:opacity-50"
+          className="md:col-span-4 px-4 py-2 rounded-lg bg-[var(--primary)] text-white font-medium disabled:opacity-50"
         >
           {loading ? '...' : 'Simulate'}
         </button>
@@ -119,7 +119,7 @@ export default function InvestmentSim({ prefillReturn, onSimulationSuccess }) {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4 text-sm">
             <p className="text-[var(--text-muted)]">Invested: <span className="text-[var(--text)]">₹{result.totalInvested?.toLocaleString('en-IN')}</span></p>
             <p className="text-[var(--text-muted)]">Future value: <span className="text-[var(--success)]">₹{result.futureValue?.toLocaleString('en-IN')}</span></p>
-            <p className="text-[var(--text-muted)]">Gain: <span className="text-[var(--accent)]">₹{result.totalGain?.toLocaleString('en-IN')}</span></p>
+            <p className="text-[var(--text-muted)]">Gain: <span className="text-[var(--primary)]">₹{result.totalGain?.toLocaleString('en-IN')}</span></p>
             <p className="text-[var(--text-muted)]">Multiple: <span className="text-[var(--text)]">{result.returnMultiple}x</span></p>
           </div>
           <div className="h-64">
@@ -133,7 +133,7 @@ export default function InvestmentSim({ prefillReturn, onSimulationSuccess }) {
                   formatter={(v) => [`₹${Number(v).toLocaleString('en-IN')}`, 'Value']}
                 />
                 <Line type="monotone" dataKey="invested" stroke="var(--text-muted)" strokeWidth={2} dot={false} name="Amount Invested" />
-                <Area type="monotone" dataKey="value" stroke="var(--accent)" fill="var(--accent)" fillOpacity={0.25} name="Portfolio Value" />
+                <Area type="monotone" dataKey="value" stroke="var(--chart-1)" fill="var(--chart-3)" fillOpacity={0.35} name="Portfolio Value" />
               </AreaChart>
             </ResponsiveContainer>
           </div>

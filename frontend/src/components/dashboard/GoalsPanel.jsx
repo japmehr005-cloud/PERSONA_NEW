@@ -52,10 +52,10 @@ export default function GoalsPanel({ goals, onGoalsChange }) {
   }
 
   return (
-    <div className="rounded-xl bg-[var(--surface)] border border-[var(--border)] p-4 mb-6">
+    <div className="ui-card rounded-xl p-4 mb-6">
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-semibold text-[var(--text)]">Goals</h2>
-        <Link to="/account" className="text-sm text-[var(--accent)] hover:underline">
+        <Link to="/account" className="text-sm text-[var(--primary)] hover:underline">
           Manage
         </Link>
       </div>
@@ -111,7 +111,7 @@ export default function GoalsPanel({ goals, onGoalsChange }) {
                     <button
                       type="button"
                       onClick={() => handleProgressUpdate(g)}
-                      className="px-2 py-1 rounded text-xs bg-[var(--accent)] text-white"
+                      className="px-2 py-1 rounded text-xs bg-[var(--primary)] text-white"
                     >
                       Confirm
                     </button>
@@ -121,7 +121,7 @@ export default function GoalsPanel({ goals, onGoalsChange }) {
                 <button
                   type="button"
                   onClick={() => setEditingGoalId(g.id)}
-                  className="text-xs text-[var(--accent)] hover:underline"
+                  className="text-xs text-[var(--primary)] hover:underline"
                 >
                   Update Progress
                 </button>
