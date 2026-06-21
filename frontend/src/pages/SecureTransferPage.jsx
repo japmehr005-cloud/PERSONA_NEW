@@ -331,7 +331,10 @@ export default function SecureTransferPage() {
                   <span
                     className="text-xs font-mono px-2 py-1 rounded"
                     style={{
-                      background: remaining > 20 ? 'var(--success)20' : 'var(--danger)20',
+                      background:
+                        remaining > 20
+                          ? 'color-mix(in srgb, var(--success) 14%, transparent)'
+                          : 'color-mix(in srgb, var(--danger) 14%, transparent)',
                       color: remaining > 20 ? 'var(--success)' : 'var(--danger)'
                     }}
                   >

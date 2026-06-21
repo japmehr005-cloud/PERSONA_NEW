@@ -270,8 +270,8 @@ export default function AdvisorPage() {
   const streakDays = Number(financialContext.streakDays || 0)
 
   return (
-    <div className="h-[calc(100vh-64px)] bg-[#0a0a0f] text-[var(--text)] flex overflow-hidden">
-      <aside className="w-[300px] shrink-0 border-r border-[var(--border)] bg-[#13131a] p-4 overflow-y-auto">
+    <div className="h-[calc(100vh-64px)] bg-[var(--bg)] text-[var(--text)] flex overflow-hidden">
+      <aside className="w-[300px] shrink-0 border-r border-[var(--border)] bg-[var(--surface)] p-4 overflow-y-auto">
         <div className="rounded-xl border border-[var(--border)] bg-[var(--bg)] p-4 mb-4">
           <h2 className="font-semibold text-[var(--text)] mb-2">Advisor</h2>
           <p className="text-sm text-[var(--text)]">{ADVISOR_META.emoji} {ADVISOR_META.name}</p>
@@ -313,9 +313,9 @@ export default function AdvisorPage() {
       </aside>
 
       <section className="flex-1 min-w-0 flex flex-col">
-        <header className="h-16 border-b border-[var(--border)] px-4 flex items-center justify-between bg-[#13131a]">
+        <header className="h-16 border-b border-[var(--border)] px-4 flex items-center justify-between bg-[var(--surface)]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-violet-700 flex items-center justify-center text-white text-lg">
+            <div className="w-10 h-10 rounded-full bg-[var(--accent)] flex items-center justify-center text-white text-lg">
               {ADVISOR_META.emoji}
             </div>
             <div>
@@ -325,8 +325,8 @@ export default function AdvisorPage() {
           </div>
           <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--success)] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--success)]" />
             </span>
             Live
           </div>
@@ -343,8 +343,8 @@ export default function AdvisorPage() {
                 <div
                   className={`px-4 py-3 text-sm ${
                     isUser
-                      ? 'bg-gradient-to-br from-purple-600 to-violet-700 text-white rounded-2xl rounded-br-sm'
-                      : 'bg-[#13131a] border border-[var(--border)] text-[var(--text)] rounded-2xl rounded-bl-sm'
+                      ? 'bg-[var(--accent)] text-white rounded-2xl rounded-br-sm'
+                      : 'bg-[var(--surface)] border border-[var(--border)] text-[var(--text)] rounded-2xl rounded-bl-sm'
                   }`}
                 >
                   {msg.content}
@@ -352,10 +352,10 @@ export default function AdvisorPage() {
                 {!isUser && (
                   <div className="mt-2 space-y-2">
                     {msg.immediateAlert && !msg.dismissedIntentCard && (
-                      <div className="border-2 border-red-500 bg-red-500/20 rounded-xl p-4 mt-2 animate-pulse">
+                      <div className="border border-[var(--danger)]/50 bg-[var(--danger)]/10 rounded-xl p-4 mt-2">
                         <p className="text-2xl">🛡️</p>
-                        <p className="text-sm font-bold text-red-300 mt-1">Your safety matters to us</p>
-                        <p className="text-xs text-red-100 mt-1">
+                        <p className="text-sm font-bold text-[var(--danger)] mt-1">Your safety matters to us</p>
+                        <p className="text-xs text-[var(--text-muted)] mt-1">
                           {msg.safetyMessage || 'Your account is being protected. Please stay calm and avoid any urgent transfers.'}
                         </p>
                         <div className="flex gap-2 mt-3">
@@ -369,7 +369,7 @@ export default function AdvisorPage() {
                           <button
                             type="button"
                             onClick={() => setShowSafetyHelpModal(true)}
-                            className="px-3 py-1.5 rounded-lg bg-red-600 text-white text-xs font-semibold"
+                            className="px-3 py-1.5 rounded-lg bg-[var(--danger)] text-white text-xs font-semibold"
                           >
                             I need help
                           </button>
@@ -379,17 +379,17 @@ export default function AdvisorPage() {
                     {msg.intentCheckSuggested && !msg.immediateAlert && !msg.dismissedIntentCard && (
                       <div className={`rounded-xl p-3 mt-2 ${
                         msg.severity === 'HIGH'
-                          ? 'border border-red-400 bg-red-400/10'
+                          ? 'border border-[var(--danger)]/40 bg-[var(--danger)]/10'
                           : msg.severity === 'MEDIUM'
-                            ? 'border border-yellow-400 bg-yellow-400/10'
-                            : 'border border-purple-400 bg-purple-400/10'
+                            ? 'border border-[var(--warn)]/40 bg-[var(--warn)]/10'
+                            : 'border border-[var(--border)] bg-[var(--surface-hover)]'
                       }`}>
-                        <p className="text-sm font-semibold text-yellow-300">⚡ Financial action detected</p>
-                        <p className="text-xs text-yellow-100 mt-1">
+                        <p className="text-sm font-semibold text-[var(--text)]">⚡ Financial action detected</p>
+                        <p className="text-xs text-[var(--text-muted)] mt-1">
                           You mentioned {msg.detectedAction || 'an action'} of ₹{Number(msg.detectedAmount || 0).toLocaleString('en-IN')}
                         </p>
                         {msg.urgencyDetected && (
-                          <p className="text-xs text-red-300 mt-2">
+                          <p className="text-xs text-[var(--danger)] mt-2">
                             ⚠️ We detected urgency in your message. Please make sure no one is pressuring you into this action.
                           </p>
                         )}
@@ -446,7 +446,7 @@ export default function AdvisorPage() {
           })}
 
           {loading && (
-            <div className="self-start px-4 py-3 rounded-2xl rounded-bl-sm bg-[#13131a] border border-[var(--border)]">
+            <div className="self-start px-4 py-3 rounded-2xl rounded-bl-sm bg-[var(--surface)] border border-[var(--border)]">
               <div className="flex items-center gap-1">
                 <span className="w-2 h-2 rounded-full bg-[var(--text-muted)] animate-bounce" />
                 <span className="w-2 h-2 rounded-full bg-[var(--text-muted)] animate-bounce [animation-delay:120ms]" />
@@ -457,7 +457,7 @@ export default function AdvisorPage() {
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="border-t border-[var(--border)] px-4 py-3 bg-[#13131a]">
+        <div className="border-t border-[var(--border)] px-4 py-3 bg-[var(--surface)]">
           <div className="flex items-center gap-2 overflow-x-auto pb-2">
             {QUICK_CHIPS.map((chip) => (
               <button
@@ -526,7 +526,7 @@ export default function AdvisorPage() {
               <button
                 type="button"
                 onClick={lockAccountNow}
-                className="px-4 py-2 rounded-lg bg-red-600 text-white font-semibold"
+                className="px-4 py-2 rounded-lg bg-[var(--danger)] text-white font-semibold"
               >
                 Lock my account now
               </button>

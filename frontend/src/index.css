@@ -1,17 +1,31 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0a0a0f;
-  --surface: #13131a;
-  --surface-hover: #1a1a24;
-  --accent: #7c3aed;
-  --accent-light: #a78bfa;
-  --text: #f4f4f5;
-  --text-muted: #a1a1aa;
-  --border: #27272a;
-  --success: #22c55e;
-  --warn: #eab308;
-  --danger: #ef4444;
+  /* Base — soft light pink canvas */
+  --bg: #fbf0f3;
+
+  /* Cards — neutral & clean (no visible tint) */
+  --surface: #ffffff;
+  --surface-hover: #f6edef;
+
+  /* Primary (pink) — buttons, active states, highlights ONLY */
+  --accent: #d6336c;
+  --accent-light: #fbc7d9;
+
+  /* Secondary (teal) — tiny accents / tags only */
+  --secondary: #0e8174;
+
+  /* Text — warm near-black, never a cold gray system */
+  --text: #2b1a21;
+  --text-muted: #8a7077;
+
+  /* Structure */
+  --border: #eedbe2;
+
+  /* Semantic states (kept minimal & calm) */
+  --success: #2f9e44;
+  --warn: #e8a50c;   /* yellow accent — charts / tiny highlights */
+  --danger: #e03131;
 }
 
 body {
@@ -20,6 +34,8 @@ body {
   color: var(--text);
   font-family: "DM Sans", system-ui, sans-serif;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 #root {
@@ -30,6 +46,7 @@ body {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-accent: var(--accent);
+  --color-secondary: var(--secondary);
   --color-text: var(--text);
   --color-text-muted: var(--text-muted);
 }

@@ -127,7 +127,7 @@ export default function IntentConfirmationModal({ data, onConfirm, onCancel }) {
 
   return (
     <div className="fixed inset-0 z-[70] bg-black/70 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl rounded-2xl bg-gray-900 border border-[var(--border)] shadow-xl overflow-hidden">
+      <div className="w-full max-w-2xl rounded-2xl bg-[var(--surface)] border border-[var(--border)] shadow-xl overflow-hidden">
         <div className="p-4 border-b border-[var(--border)]">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -147,8 +147,8 @@ export default function IntentConfirmationModal({ data, onConfirm, onCancel }) {
                 <div
                   className={`px-3 py-2 rounded-xl text-sm ${
                     msg.role === 'user'
-                      ? 'bg-gradient-to-br from-purple-600 to-violet-700 text-white rounded-br-sm'
-                      : 'bg-gray-800 border border-[var(--border)] text-[var(--text)] rounded-bl-sm'
+                      ? 'bg-[var(--accent)] text-white rounded-br-sm'
+                      : 'bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--text)] rounded-bl-sm'
                   }`}
                 >
                   {msg.content}
@@ -189,7 +189,7 @@ export default function IntentConfirmationModal({ data, onConfirm, onCancel }) {
               <div className="p-3 border-t border-[var(--border)] space-y-2">
                 {signals.length === 0 && <p className="text-xs text-[var(--text-muted)]">No additional signals.</p>}
                 {signals.map((sig, i) => (
-                  <div key={`${sig.name}-${i}`} className="rounded-lg border border-[var(--border)] bg-gray-800 p-2">
+                  <div key={`${sig.name}-${i}`} className="rounded-lg border border-[var(--border)] bg-[var(--surface-hover)] p-2">
                     <p className="text-xs font-semibold text-[var(--text)]">{sig.name}</p>
                     {sig.explanation && <p className="text-xs text-[var(--text-muted)] mt-1">{sig.explanation}</p>}
                   </div>
@@ -210,8 +210,8 @@ export default function IntentConfirmationModal({ data, onConfirm, onCancel }) {
           {analysis?.recommended_action === 'EXPLAIN_AND_RECONFIRM' && (
             <div className="flex flex-wrap items-center justify-end gap-2">
               <button type="button" onClick={onCancel} className="px-3 py-2 rounded-lg bg-[var(--surface-hover)] text-[var(--text)] text-sm">Cancel, I will think about it</button>
-              <button type="button" onClick={handleSchedule} className="px-3 py-2 rounded-lg bg-purple-700 text-white text-sm">Schedule for 4 hours later</button>
-              <button type="button" onClick={handleProceed} className="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold">I understand, proceed anyway</button>
+              <button type="button" onClick={handleSchedule} className="px-3 py-2 rounded-lg border border-[var(--border)] bg-[var(--surface)] text-[var(--text)] text-sm">Schedule for 4 hours later</button>
+              <button type="button" onClick={handleProceed} className="px-3 py-2 rounded-lg bg-[var(--accent)] text-white text-sm font-semibold">I understand, proceed anyway</button>
             </div>
           )}
 
@@ -222,7 +222,7 @@ export default function IntentConfirmationModal({ data, onConfirm, onCancel }) {
                 You can cancel anytime from the Security page.
               </div>
               <div className="flex justify-end">
-                <button type="button" onClick={onCancel} className="px-3 py-2 rounded-lg border border-red-400 text-red-300 text-sm">Cancel this scheduled action</button>
+                <button type="button" onClick={onCancel} className="px-3 py-2 rounded-lg border border-[var(--danger)]/50 text-[var(--danger)] text-sm">Cancel this scheduled action</button>
               </div>
             </div>
           )}

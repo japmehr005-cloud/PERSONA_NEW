@@ -105,7 +105,7 @@ export default function SimulatePage() {
 
   return (
     <div>
-      <div className="mb-4 p-3 rounded-lg bg-amber-600/20 border border-amber-500/40 text-xs text-amber-200">
+      <div className="mb-4 p-3 rounded-lg bg-[var(--warn)]/10 border border-[var(--warn)]/40 text-xs text-[var(--text-muted)]">
         ⚠ For simulation and demo purposes only. Not financial advice. Actual returns may vary.
         Complete KYC before making real investments.
       </div>

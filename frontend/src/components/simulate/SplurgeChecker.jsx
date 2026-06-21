@@ -157,7 +157,7 @@ export default function SplurgeChecker({ profile, primaryGoal, onSimulationSucce
       <h3 className="font-semibold text-[var(--text)] mb-3">Splurge checker</h3>
       <div className={`mb-3 rounded-lg border px-3 py-2 text-xs flex items-center gap-2 ${
         conversationalStatus == null
-          ? 'bg-gray-500/10 border-gray-500/40 text-gray-300'
+          ? 'bg-[var(--surface-hover)] border-[var(--border)] text-[var(--text-muted)]'
           : conversationalStatus.baselineMature
             ? 'bg-[var(--success)]/10 border-[var(--success)]/40 text-[var(--success)]'
             : 'bg-[var(--warn)]/10 border-[var(--warn)]/40 text-[var(--warn)]'
@@ -213,7 +213,7 @@ export default function SplurgeChecker({ profile, primaryGoal, onSimulationSucce
         </button>
       </form>
       {preWarning && (
-        <div className="mb-3 rounded-lg border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-200">
+        <div className="mb-3 rounded-lg border border-[var(--warn)]/40 bg-[var(--warn)]/10 p-3 text-sm text-[var(--text-muted)]">
           {preWarning}
         </div>
       )}
