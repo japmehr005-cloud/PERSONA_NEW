@@ -11,6 +11,7 @@ import securityRoutes from './routes/security.js'
 import simulateRiskRoutes from './routes/simulateRisk.js'
 import chatRoutes from './routes/chat.js'
 import intentSecurityRoutes from './routes/intentSecurity.js'
+import cbOtpRoutes from './routes/cbOtp.js'
 
 const app = express()
 app.use(cors({
@@ -42,6 +43,7 @@ app.use('/api/simulate', simulateRiskRoutes)
 app.use('/api/chat', chatRoutes)
 app.use('/api/intent', intentSecurityRoutes)
 app.use('/api/profile', intentSecurityRoutes)
+app.use('/api/cb-otp', cbOtpRoutes)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => console.log(`Node API running on ${PORT}`))

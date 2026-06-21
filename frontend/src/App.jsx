@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
 import AccountSetupPage from './pages/AccountSetupPage'
 import SimulatePage from './pages/SimulatePage'
+import SecureTransferPage from './pages/SecureTransferPage'
 import SecurityPage from './pages/SecurityPage'
 import AchievementsPage from './pages/AchievementsPage'
 import AdvisorPage from './pages/AdvisorPage'
@@ -44,6 +45,7 @@ export default function App() {
                   <Route path="/dashboard" element={<ErrorBoundary><DashboardPage /></ErrorBoundary>} />
                   <Route path="/account" element={<ErrorBoundary><AccountSetupPage /></ErrorBoundary>} />
                   <Route path="/simulate" element={<ErrorBoundary><SimulatePage /></ErrorBoundary>} />
+                  <Route path="/secure-transfer" element={<ErrorBoundary><SecureTransferPage /></ErrorBoundary>} />
                   <Route path="/security" element={<ErrorBoundary><SecurityPage /></ErrorBoundary>} />
                   <Route path="/advisor" element={<ErrorBoundary><ProtectedRoute><AdvisorPage /></ProtectedRoute></ErrorBoundary>} />
                   <Route path="/achievements" element={<ErrorBoundary><AchievementsPage /></ErrorBoundary>} />

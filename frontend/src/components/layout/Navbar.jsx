@@ -9,6 +9,7 @@ export default function Navbar() {
     { path: '/dashboard', label: 'Dashboard' },
     { path: '/account', label: 'Account' },
     { path: '/simulate', label: 'Simulate' },
+    { path: '/secure-transfer', label: 'Secure Transfer' },
     { path: '/security', label: 'Security' },
     { path: '/advisor', label: 'Advisor' },
     { path: '/achievements', label: 'Achievements' },
